@@ -1,0 +1,66 @@
+schema_version = 1
+
+[service.convex]
+cmd = "DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh up"
+port = { base = 3210, slot_offset = 20 }
+url = "http://{host}:{port}"
+health = { http = "http://127.0.0.1:{port}/version" }
+depends_on = ["root::docker"]
+
+[task.codegen]
+kind = "utility"
+description = "Generate the Confect and Convex boundary code"
+cmd = "bunx confect codegen"
+steps = ["root::dependencies"]
+timeout = 120
+
+[task.deploy]
+kind = "utility"
+description = "Publish the current Confect functions to local Convex"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh deploy"
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.test]
+kind = "check"
+description = "Run backend unit and contract tests"
+cmd = "vp test backend"
+cwd = ".."
+steps = ["root::dependencies"]
+timeout = 180
+
+[task.live-smoke]
+kind = "check"
+description = "Deploy and exercise the backend through its public wire contract"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh live-smoke"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.contract-export]
+kind = "utility"
+description = "Export the deployed Convex function contract for native clients"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh function-spec"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.contract-check]
+kind = "check"
+description = "Fail when the deployed Convex contract differs from the reviewed manifest"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh function-spec-check"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.launch]
+kind = "launch"
+description = "Start and deploy the local Convex backend"
+cmd = "true"
+depends_on = ["deploy"]
+services = ["convex"]
+timeout = 180

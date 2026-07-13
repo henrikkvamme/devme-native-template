@@ -1,0 +1,51 @@
+name: "${COMPOSE_PROJECT_NAME:-sambu}"
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: "${CONVEX_DATABASE_NAME:-sambu_local}"
+      POSTGRES_PASSWORD: convex-local
+      POSTGRES_USER: convex
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U convex -d $$POSTGRES_DB"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  backend:
+    image: ghcr.io/get-convex/convex-backend:latest@sha256:104b8bc70e29b31fa4a57551596090bfc9eedc3d1f27fd4b8cd8d0e782b9b070
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DO_NOT_REQUIRE_SSL: "1"
+      INSTANCE_NAME: "${CONVEX_INSTANCE_NAME:-sambu-local}"
+      INSTANCE_SECRET: "${CONVEX_INSTANCE_SECRET:?Set CONVEX_INSTANCE_SECRET to a 64-character hexadecimal development secret}"
+      POSTGRES_URL: postgresql://convex:convex-local@postgres:5432
+      RUST_LOG: info
+    ports:
+      - "127.0.0.1:${CONVEX_PORT:-3210}:3210"
+      - "127.0.0.1:${CONVEX_SITE_PORT:-3211}:3211"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3210/version"]
+      interval: 2s
+      timeout: 3s
+      retries: 60
+
+  dashboard:
+    image: ghcr.io/get-convex/convex-dashboard:latest@sha256:60b04b339d6cd6623057b03e5275329a20011051907ec5e689a38a401cfdc409
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_DEPLOYMENT_URL: "http://127.0.0.1:${CONVEX_PORT:-3210}"
+    ports:
+      - "127.0.0.1:${CONVEX_DASHBOARD_PORT:-6791}:6791"
+
+volumes:
+  postgres-data:

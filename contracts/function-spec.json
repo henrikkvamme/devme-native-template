@@ -1,0 +1,99 @@
+{
+  "url": "",
+  "functions": [
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "bootstrap.js:list",
+      "returns": {
+        "type": "array",
+        "value": {
+          "type": "object",
+          "value": {
+            "_creationTime": {
+              "fieldType": {
+                "type": "number"
+              },
+              "optional": false
+            },
+            "_id": {
+              "fieldType": {
+                "tableName": "bootstrapEvents",
+                "type": "id"
+              },
+              "optional": false
+            },
+            "client": {
+              "fieldType": {
+                "type": "union",
+                "value": [
+                  {
+                    "type": "literal",
+                    "value": "android"
+                  },
+                  {
+                    "type": "literal",
+                    "value": "ios"
+                  },
+                  {
+                    "type": "literal",
+                    "value": "test"
+                  }
+                ]
+              },
+              "optional": false
+            },
+            "message": {
+              "fieldType": {
+                "type": "string"
+              },
+              "optional": false
+            }
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "client": {
+            "fieldType": {
+              "type": "union",
+              "value": [
+                {
+                  "type": "literal",
+                  "value": "android"
+                },
+                {
+                  "type": "literal",
+                  "value": "ios"
+                },
+                {
+                  "type": "literal",
+                  "value": "test"
+                }
+              ]
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "bootstrap.js:ping",
+      "returns": {
+        "tableName": "bootstrapEvents",
+        "type": "id"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    }
+  ]
+}

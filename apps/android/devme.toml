@@ -1,0 +1,26 @@
+schema_version = 1
+
+[step.sdk]
+check = "test -d ../../.devme/android-sdk/platforms/android-37.0 && test -x ../../.devme/android-sdk/platform-tools/adb"
+provision = "../../tooling/android-sdk.sh"
+trust = "prompt"
+
+[task.test]
+kind = "check"
+description = "Build, test, and lint the Android app"
+cmd = "./gradlew testDebugUnitTest lintDebug"
+steps = ["sdk"]
+resources = ["root::android-sdk"]
+env = { ANDROID_HOME = "{worktree}/.devme/android-sdk", ANDROID_SDK_ROOT = "{worktree}/.devme/android-sdk", GRADLE_USER_HOME = "{worktree}/.devme/gradle-{slot}" }
+timeout = 1200
+
+[task.e2e]
+kind = "check"
+description = "Verify an Android mutation and reactive UI in Emulator"
+cmd = "DEVME_SLOT={slot} ../../tooling/android-e2e.sh"
+depends_on = ["backend::deploy"]
+steps = ["sdk", "root::dependencies"]
+services = ["backend::convex"]
+resources = ["root::android-emulator"]
+env = { ANDROID_HOME = "{worktree}/.devme/android-sdk", ANDROID_SDK_ROOT = "{worktree}/.devme/android-sdk", GRADLE_USER_HOME = "{worktree}/.devme/gradle-{slot}" }
+timeout = 1800

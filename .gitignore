@@ -1,0 +1,16 @@
+.DS_Store
+.devme/
+.env.local
+.idea/
+*.iml
+node_modules/
+
+# Convex and Confect generated output
+backend/.convex/
+
+# Native build output
+apps/android/.gradle/
+apps/android/build/
+apps/android/app/build/
+apps/ios/DerivedData/
+apps/ios/.swiftpm/
