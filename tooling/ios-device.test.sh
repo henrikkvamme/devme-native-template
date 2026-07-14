@@ -28,25 +28,46 @@ if [[ "${1:-}" == "status" && "${2:-}" == "--json" ]]; then
 fi
 
 if [[ "${1:-}" == "serve" && "${2:-}" == "status" && "${3:-}" == "--json" ]]; then
-  if [[ -f "${SERVE_STATE:-/nonexistent}" ]]; then
-    target="$(cat "$SERVE_STATE")"
-    printf '{"TCP":{"8443":{"HTTPS":true}},"Web":{"macbook.example.invalid:8443":{"Handlers":{"/":{"Proxy":"%s"}}}}}\n' "$target"
-  else
-    printf '{}\n'
-  fi
+  state="${SERVE_STATE:-/nonexistent}"
+  first=true
+  printf '{"TCP":{'
+  for port in 8443 8444; do
+    if [[ -f "$state-$port" ]]; then
+      [[ "$first" == true ]] || printf ','
+      printf '"%s":{"HTTPS":true}' "$port"
+      first=false
+    fi
+  done
+  printf '},"Web":{'
+  first=true
+  for port in 8443 8444; do
+    if [[ -f "$state-$port" ]]; then
+      [[ "$first" == true ]] || printf ','
+      target="$(cat "$state-$port")"
+      printf '"macbook.example.invalid:%s":{"Handlers":{"/":{"Proxy":"%s"}}}' "$port" "$target"
+      first=false
+    fi
+  done
+  printf '}}\n'
   exit 0
 fi
 
 if [[ "${1:-}" == "serve" && "$*" == *'--bg'* ]]; then
-  printf '%s\n' "${*: -1}" >"$SERVE_STATE"
+  for argument in "$@"; do
+    if [[ "$argument" == --https=* ]]; then port="${argument#--https=}"; fi
+  done
+  printf '%s\n' "${*: -1}" >"$SERVE_STATE-$port"
 fi
 
 if [[ "${1:-}" == "serve" && "${*: -1}" == "off" ]]; then
-  if [[ ! -f "$SERVE_STATE" ]]; then
+  for argument in "$@"; do
+    if [[ "$argument" == --https=* ]]; then port="${argument#--https=}"; fi
+  done
+  if [[ ! -f "$SERVE_STATE-$port" ]]; then
     printf 'handler does not exist\n' >&2
     exit 1
   fi
-  rm -f "$SERVE_STATE"
+  rm -f "$SERVE_STATE-$port"
 fi
 
 printf 'tailscale %s\n' "$*" >>"$COMMAND_LOG"
@@ -181,8 +202,9 @@ PATH="$fake_bin:$PATH" \
   "$root/tooling/tailscale-convex.sh" stop >"$temporary_directory/already-stopped.out"
 assert_contains "$temporary_directory/already-stopped.out" 'status: already-stopped'
 assert_contains "$command_log" 'tailscale serve --yes --bg --https=8443 http://127.0.0.1:3210'
+assert_contains "$command_log" 'tailscale serve --yes --bg --https=8444 http://127.0.0.1:3211'
 
-printf 'http://127.0.0.1:9999\n' >"$temporary_directory/serve-state"
+printf 'http://127.0.0.1:9999\n' >"$temporary_directory/serve-state-8443"
 mismatch_output="$temporary_directory/mismatch.out"
 if PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
@@ -208,7 +230,7 @@ if grep -Fq 'https://error:' "$url_failure_output"; then
 fi
 
 health_failure_output="$temporary_directory/health-failure.out"
-rm -f "$temporary_directory/serve-state"
+rm -f "$temporary_directory/serve-state-8443" "$temporary_directory/serve-state-8444"
 if PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
   SERVE_STATE="$temporary_directory/serve-state" \
@@ -237,6 +259,7 @@ PATH="$fake_bin:$PATH" \
   "$root/tooling/ios-device.sh" launch >"$temporary_directory/launch.out"
 
 assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.invalid:8483'
+assert_contains "$command_log" 'AUTH_SITE_URL=https://macbook.example.invalid:8484'
 assert_contains "$command_log" 'DEVELOPMENT_TEAM=ABCDE12345'
 assert_contains "$command_log" 'platform=iOS,id=PHONE-1'
 assert_contains "$command_log" 'device install app --device PHONE-1'

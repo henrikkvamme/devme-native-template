@@ -6,10 +6,11 @@ source "$root/tooling/devme-ports.sh"
 readonly compose_file="$root/infrastructure/convex/compose.yaml"
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="${CONVEX_PORT:-$(devme_convex_port "$slot")}"
-readonly site_port="${CONVEX_SITE_PORT:-$((convex_port + 1))}"
+readonly site_port="${CONVEX_SITE_PORT:-$(devme_convex_site_port "$slot")}"
 readonly dashboard_port="${CONVEX_DASHBOARD_PORT:-$((convex_port + 2))}"
 readonly postgres_port="${POSTGRES_PORT:-$((convex_port + 3))}"
 readonly instance_secret_file="$root/.devme/convex-instance-secret-$slot"
+readonly auth_secret_file="$root/.devme/better-auth-secret-$slot"
 
 resolve_instance_secret() {
   local secret="${CONVEX_INSTANCE_SECRET:-}"
@@ -51,6 +52,48 @@ admin_key() {
   printf '%s\n' "$key"
 }
 
+ensure_local_auth_env() {
+  local admin_key="$1"
+  local auth_secret
+  if [[ ! -s "$auth_secret_file" ]]; then
+    mkdir -p "$root/.devme"
+    umask 077
+    openssl rand -base64 32 >"$auth_secret_file"
+  fi
+  auth_secret="$(tr -d '\r\n' <"$auth_secret_file")"
+
+  set_convex_env "$admin_key" BETTER_AUTH_SECRET "$auth_secret"
+  set_convex_env "$admin_key" AUTH_ENABLE_TEST_PASSWORD true
+  local environment
+  environment="$(
+    CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+      CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+      bunx convex env list
+  )"
+  if [[ "$environment" != *'JWKS='* ]]; then
+    set_convex_env "$admin_key" JWKS '[]'
+  fi
+}
+
+set_convex_env() {
+  local admin_key="$1"
+  local name="$2"
+  local value="$3"
+  local attempt
+
+  cd "$root/backend"
+  for attempt in 1 2 3 4 5; do
+    if CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+      CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+      bunx convex env set "$name" "$value" >/dev/null 2>&1; then
+      return
+    fi
+    sleep 1
+  done
+  printf 'Could not set the local Convex environment variable %s.\n' "$name" >&2
+  return 1
+}
+
 case "${1:-}" in
   up)
     compose up --remove-orphans
@@ -60,20 +103,46 @@ case "${1:-}" in
     ;;
   deploy)
     admin_key="$(admin_key)"
+    ensure_local_auth_env "$admin_key"
     cd "$root/backend"
     CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
       CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
-      bunx confect codegen
+      CONVEX_SITE_URL="http://127.0.0.1:$site_port" \
+      bun run codegen
     CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
       CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+      CONVEX_SITE_URL="http://127.0.0.1:$site_port" \
       bunx convex deploy --yes
+    current_jwks="$(
+      CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+        CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+        bunx convex env get JWKS
+    )"
+    if [[ "$current_jwks" == '[]' ]]; then
+      jwks="$(
+        CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+          CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+          bunx convex run auth:getLatestJwks
+      )"
+      set_convex_env "$admin_key" JWKS "$jwks"
+      CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+        CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+        CONVEX_SITE_URL="http://127.0.0.1:$site_port" \
+        bunx convex deploy --yes
+    fi
+    cd "$root"
+    bun run format
     ;;
   function-spec)
     admin_key="$(admin_key)"
     cd "$root/backend"
     CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
       CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
-      bunx convex function-spec >"$root/contracts/function-spec.json"
+      bunx convex function-spec | bun -e '
+        const spec = await Bun.stdin.json();
+        spec.url = "";
+        console.log(JSON.stringify(spec, null, 2));
+      ' >"$root/contracts/function-spec.json"
     ;;
   function-spec-check)
     admin_key="$(admin_key)"
@@ -82,7 +151,11 @@ case "${1:-}" in
     cd "$root/backend"
     CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
       CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
-      bunx convex function-spec >"$temporary_spec"
+      bunx convex function-spec | bun -e '
+        const spec = await Bun.stdin.json();
+        spec.url = "";
+        console.log(JSON.stringify(spec, null, 2));
+      ' >"$temporary_spec"
     if ! cmp -s "$root/contracts/function-spec.json" "$temporary_spec"; then
       diff -u "$root/contracts/function-spec.json" "$temporary_spec" || true
       printf 'Convex function spec changed. Run devme run contract-export and review it.\n' >&2
@@ -93,8 +166,13 @@ case "${1:-}" in
     CONVEX_URL="http://127.0.0.1:$convex_port" \
       bun "$root/backend/test/live-smoke.ts"
     ;;
+  auth-live-smoke)
+    CONVEX_URL="http://127.0.0.1:$convex_port" \
+      AUTH_SITE_URL="http://127.0.0.1:$site_port" \
+      bun "$root/backend/test/auth-live-smoke.ts"
+    ;;
   *)
-    printf 'Usage: %s {up|down|deploy|function-spec|function-spec-check|live-smoke}\n' "$0" >&2
+    printf 'Usage: %s {up|down|deploy|function-spec|function-spec-check|live-smoke|auth-live-smoke}\n' "$0" >&2
     exit 64
     ;;
 esac

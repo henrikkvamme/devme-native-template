@@ -12,7 +12,10 @@ android = "apps/android"
 [logs]
 redact = [
   "(?i)authorization: bearer [^[:space:]]+",
+  "(?i)set-auth-token: [^[:space:]]+",
+  "BETTER_AUTH_SECRET=[^[:space:]]+",
   "CONVEX_DEPLOY_KEY=[^[:space:]]+",
+  "(?i)STRIPE_(SECRET_KEY|WEBHOOK_SECRET)=[^[:space:]]+",
   "(?i)(development|production):[A-Za-z0-9_-]+\\|[A-Za-z0-9_-]+",
 ]
 retention_bytes = 16777216
@@ -55,6 +58,7 @@ depends_on = [
   "typescript-check",
   "backend::test",
   "backend::live-smoke",
+  "backend::auth-live-smoke",
   "backend::contract-check",
   "ios::test",
   "ios::e2e",

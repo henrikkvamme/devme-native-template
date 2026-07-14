@@ -10,7 +10,7 @@ depends_on = ["root::docker"]
 [task.codegen]
 kind = "utility"
 description = "Generate the Confect and Convex boundary code"
-cmd = "bunx confect codegen"
+cmd = "bun run codegen"
 steps = ["root::dependencies"]
 timeout = 120
 
@@ -34,6 +34,15 @@ timeout = 180
 kind = "check"
 description = "Deploy and exercise the backend through its public wire contract"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh live-smoke"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.auth-live-smoke]
+kind = "check"
+description = "Verify Better Auth, Convex identity, and Stripe route integration"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-live-smoke"
 depends_on = ["deploy"]
 steps = ["root::dependencies"]
 services = ["convex"]

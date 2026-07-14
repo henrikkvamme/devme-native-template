@@ -24,6 +24,8 @@ services:
         condition: service_healthy
     environment:
       DO_NOT_REQUIRE_SSL: "1"
+      CONVEX_CLOUD_ORIGIN: "http://127.0.0.1:${CONVEX_PORT:-3210}"
+      CONVEX_SITE_ORIGIN: "http://127.0.0.1:${CONVEX_SITE_PORT:-3211}"
       INSTANCE_NAME: "${CONVEX_INSTANCE_NAME:-starter-local}"
       INSTANCE_SECRET: "${CONVEX_INSTANCE_SECRET:?Set CONVEX_INSTANCE_SECRET to a 64-character hexadecimal development secret}"
       POSTGRES_URL: postgresql://convex:convex-local@postgres:5432

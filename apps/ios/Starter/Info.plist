@@ -20,6 +20,8 @@
   <string>1</string>
   <key>CONVEX_URL</key>
   <string>$(CONVEX_URL)</string>
+  <key>AUTH_SITE_URL</key>
+  <string>$(AUTH_SITE_URL)</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>NSAppTransportSecurity</key>

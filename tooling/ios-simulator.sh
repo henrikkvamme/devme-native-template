@@ -6,6 +6,7 @@ source "$root/tooling/devme-ports.sh"
 
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
+readonly auth_site_port="$(devme_convex_site_port "$slot")"
 readonly derived_data="$root/.devme/DerivedData-simulator-$slot"
 readonly build_log="$root/.devme/ios-simulator-build-$slot.log"
 readonly xcrun_bin="${XCRUN_BIN:-xcrun}"
@@ -63,7 +64,8 @@ if ! "$xcodebuild_bin" build \
   -derivedDataPath "$derived_data" \
   -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
   CODE_SIGNING_ALLOWED=NO \
-  CONVEX_URL="http://127.0.0.1:$convex_port" >"$build_log" 2>&1; then
+  CONVEX_URL="http://127.0.0.1:$convex_port" \
+  AUTH_SITE_URL="http://127.0.0.1:$auth_site_port" >"$build_log" 2>&1; then
   tail -n 80 "$build_log" >&2
   fail \
     'Xcode could not build Starter for the selected simulator.' \

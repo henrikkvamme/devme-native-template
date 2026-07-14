@@ -18,4 +18,6 @@ devme
 
 ## Customize
 
-Rename the `Starter` targets and replace the `dev.starter.app` identifiers before shipping. Authentication is intentionally omitted.
+Rename the `Starter` targets and replace the `dev.starter.app` identifiers before shipping.
+
+The `codex/better-auth-stripe-spike` branch explores optional authentication and billing. See [docs/auth-and-billing.md](docs/auth-and-billing.md).

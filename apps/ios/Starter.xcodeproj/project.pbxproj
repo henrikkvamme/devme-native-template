@@ -18,6 +18,7 @@
 		100000000000000000000009 /* ConvexMobile in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000002 /* ConvexMobile */; };
 		10000000000000000000000A /* StarterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* StarterUITests.swift */; };
 		10000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000E /* Assets.xcassets */; };
+		10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000F /* BetterAuthNativeClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		20000000000000000000000C /* StarterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterUITests.swift; sourceTree = "<group>"; };
 		20000000000000000000000D /* StarterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20000000000000000000000F /* BetterAuthNativeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterAuthNativeClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,6 +111,7 @@
 			isa = PBXGroup;
 			children = (
 				200000000000000000000003 /* StarterConvexAPI.swift */,
+				20000000000000000000000F /* BetterAuthNativeClient.swift */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -308,6 +311,7 @@
 				100000000000000000000004 /* HomeViewModel.swift in Sources */,
 				100000000000000000000005 /* HomeView.swift in Sources */,
 				100000000000000000000006 /* RootTabView.swift in Sources */,
+				10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,6 +463,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTH_SITE_URL = "http://127.0.0.1:3211";
 				CODE_SIGN_STYLE = Automatic;
 				CONVEX_URL = "http://127.0.0.1:3210";
 				CURRENT_PROJECT_VERSION = 1;
@@ -487,6 +492,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTH_SITE_URL = "https://replace-before-release.invalid";
 				CODE_SIGN_STYLE = Automatic;
 				CONVEX_URL = "https://replace-before-release.invalid";
 				CURRENT_PROJECT_VERSION = 1;

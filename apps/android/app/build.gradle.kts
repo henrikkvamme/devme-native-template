@@ -7,6 +7,9 @@ plugins {
 val debugConvexUrl = providers
   .gradleProperty("convexUrl")
   .orElse("http://10.0.2.2:3210")
+val debugAuthSiteUrl = providers
+  .gradleProperty("authSiteUrl")
+  .orElse("http://10.0.2.2:3211")
 
 configurations.configureEach {
   // Convex 0.8.0 pins JNA 5.14.0, whose native binary cannot load on 16 KB
@@ -40,11 +43,21 @@ android {
         "CONVEX_URL",
         "\"${debugConvexUrl.get()}\"",
       )
+      buildConfigField(
+        "String",
+        "AUTH_SITE_URL",
+        "\"${debugAuthSiteUrl.get()}\"",
+      )
     }
     release {
       buildConfigField(
         "String",
         "CONVEX_URL",
+        "\"https://replace-before-release.invalid\"",
+      )
+      buildConfigField(
+        "String",
+        "AUTH_SITE_URL",
         "\"https://replace-before-release.invalid\"",
       )
       isMinifyEnabled = true
