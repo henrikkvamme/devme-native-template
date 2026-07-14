@@ -15,14 +15,17 @@ final class StarterUITests: XCTestCase {
       "The app never connected to local Convex."
     )
 
+    XCTAssertFalse(app.tabBars.buttons["Activity"].exists)
+    app.tabBars.buttons["Settings"].tap()
+
     let signInButton = app.buttons["Sign in demo user"]
     if signInButton.waitForExistence(timeout: 3) {
       signInButton.tap()
     }
 
     XCTAssertTrue(
-      app.staticTexts["Authenticated Convex identity verified"].waitForExistence(timeout: 20),
-      "The native Better Auth session did not become an authenticated Convex identity."
+      app.staticTexts["Signed in securely"].waitForExistence(timeout: 20),
+      "The native Better Auth session did not render in the Settings profile card."
     )
     XCTAssertTrue(
       app.staticTexts["native-starter-demo@example.test"].waitForExistence(timeout: 5),
@@ -40,6 +43,12 @@ final class StarterUITests: XCTestCase {
       )
     }
 
+    let profileAttachment = XCTAttachment(screenshot: app.screenshot())
+    profileAttachment.name = "Starter iOS Settings profile"
+    profileAttachment.lifetime = .keepAlways
+    add(profileAttachment)
+
+    app.tabBars.buttons["Home"].tap()
     app.buttons["Send native ping"].tap()
 
     XCTAssertTrue(

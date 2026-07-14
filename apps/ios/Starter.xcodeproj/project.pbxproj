@@ -19,6 +19,7 @@
 		10000000000000000000000A /* StarterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* StarterUITests.swift */; };
 		10000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000E /* Assets.xcassets */; };
 		10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000F /* BetterAuthNativeClient.swift */; };
+		10000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000010 /* SettingsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +55,7 @@
 		20000000000000000000000D /* StarterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		20000000000000000000000F /* BetterAuthNativeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterAuthNativeClient.swift; sourceTree = "<group>"; };
+		200000000000000000000010 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -120,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				500000000000000000000005 /* Home */,
+				50000000000000000000000A /* Settings */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -131,6 +134,14 @@
 				200000000000000000000005 /* HomeView.swift */,
 			);
 			path = Home;
+			sourceTree = "<group>";
+		};
+		50000000000000000000000A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000010 /* SettingsView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		500000000000000000000006 /* StarterTests */ = {
@@ -312,6 +323,7 @@
 				100000000000000000000005 /* HomeView.swift in Sources */,
 				100000000000000000000006 /* RootTabView.swift in Sources */,
 				10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */,
+				10000000000000000000000D /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
