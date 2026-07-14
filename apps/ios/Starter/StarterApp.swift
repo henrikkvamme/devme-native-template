@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct SambuApp: App {
+struct StarterApp: App {
   var body: some Scene {
     WindowGroup {
       RootTabView(
-        backend: LiveSambuConvexAPI(
+        backend: LiveStarterConvexAPI(
           deploymentURL: AppConfiguration.convexURL
         )
       )

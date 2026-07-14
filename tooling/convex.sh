@@ -28,13 +28,13 @@ resolve_instance_secret() {
   printf '%s\n' "$secret"
 }
 
-export COMPOSE_PROJECT_NAME="sambu-$slot"
+export COMPOSE_PROJECT_NAME="starter-$slot"
 export CONVEX_PORT="$convex_port"
 export CONVEX_SITE_PORT="$site_port"
 export CONVEX_DASHBOARD_PORT="$dashboard_port"
 export POSTGRES_PORT="$postgres_port"
-export CONVEX_INSTANCE_NAME="sambu-$slot"
-export CONVEX_DATABASE_NAME="sambu_$slot"
+export CONVEX_INSTANCE_NAME="starter-$slot"
+export CONVEX_DATABASE_NAME="starter_$slot"
 export CONVEX_INSTANCE_SECRET="$(resolve_instance_secret)"
 
 compose() {

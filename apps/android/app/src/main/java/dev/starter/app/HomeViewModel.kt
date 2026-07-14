@@ -1,4 +1,4 @@
-package dev.sambu.app
+package dev.starter.app
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -18,7 +18,7 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-  private val backend: SambuBackend,
+  private val backend: StarterBackend,
 ) : ViewModel() {
   private val mutableState = MutableStateFlow(HomeUiState())
   val state: StateFlow<HomeUiState> = mutableState.asStateFlow()
@@ -65,7 +65,7 @@ class HomeViewModel(
   }
 
   class Factory(
-    private val backend: SambuBackend,
+    private val backend: StarterBackend,
   ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T =

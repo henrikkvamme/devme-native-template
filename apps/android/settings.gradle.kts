@@ -14,5 +14,5 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Sambu"
+rootProject.name = "Starter"
 include(":app")

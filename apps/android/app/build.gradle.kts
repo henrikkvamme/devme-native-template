@@ -15,11 +15,11 @@ configurations.configureEach {
 }
 
 android {
-  namespace = "dev.sambu.app"
+  namespace = "dev.starter.app"
   compileSdk = 37
 
   defaultConfig {
-    applicationId = "dev.sambu.app"
+    applicationId = "dev.starter.app"
     minSdk = 26
     targetSdk = 37
     versionCode = 1

@@ -92,7 +92,7 @@ SCRIPT
 cat >"$fake_bin/PlistBuddy" <<'SCRIPT'
 #!/usr/bin/env bash
 set -euo pipefail
-printf 'dev.sambu.app\n'
+printf 'dev.starter.app\n'
 SCRIPT
 
 cat >"$fake_bin/xcodebuild" <<'SCRIPT'
@@ -109,7 +109,7 @@ while (($#)); do
   shift
 done
 
-mkdir -p "$derived_data/Build/Products/Debug-iphoneos/Sambu.app"
+mkdir -p "$derived_data/Build/Products/Debug-iphoneos/Starter.app"
 SCRIPT
 
 cat >"$fake_bin/xcrun" <<'SCRIPT'
@@ -240,7 +240,7 @@ assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.invalid:8483'
 assert_contains "$command_log" 'DEVELOPMENT_TEAM=ABCDE12345'
 assert_contains "$command_log" 'platform=iOS,id=PHONE-1'
 assert_contains "$command_log" 'device install app --device PHONE-1'
-assert_contains "$command_log" 'device process launch --device PHONE-1 --terminate-existing dev.sambu.app'
+assert_contains "$command_log" 'device process launch --device PHONE-1 --terminate-existing dev.starter.app'
 assert_contains "$temporary_directory/launch.out" 'status: launched'
 
 : >"$command_log"

@@ -8,7 +8,7 @@ readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
 readonly emulator_port="$((5554 + slot * 2))"
 readonly serial="emulator-$emulator_port"
-readonly avd_name="sambu-devme-$slot"
+readonly avd_name="starter-devme-$slot"
 readonly image="system-images;android-37.0;google_apis_ps16k;arm64-v8a"
 readonly adb="$sdk_root/platform-tools/adb"
 readonly emulator="$sdk_root/emulator/emulator"
@@ -71,14 +71,14 @@ done
 readonly apk="$root/apps/android/app/build/outputs/apk/debug/app-debug.apk"
 "$adb" -s "$serial" install -r "$apk" >/dev/null
 "$adb" -s "$serial" shell pm grant \
-  dev.sambu.app android.permission.ACCESS_LOCAL_NETWORK
+  dev.starter.app android.permission.ACCESS_LOCAL_NETWORK
 "$adb" -s "$serial" shell am start -W \
-  -n dev.sambu.app/.MainActivity >/dev/null
+  -n dev.starter.app/.MainActivity >/dev/null
 
 deadline=$((SECONDS + 60))
 while true; do
-  "$adb" -s "$serial" shell uiautomator dump /sdcard/sambu-window.xml >/dev/null
-  ui="$("$adb" -s "$serial" shell cat /sdcard/sambu-window.xml)"
+  "$adb" -s "$serial" shell uiautomator dump /sdcard/starter-window.xml >/dev/null
+  ui="$("$adb" -s "$serial" shell cat /sdcard/starter-window.xml)"
   if [[ "$ui" == *"Connected to Convex"* && "$ui" == *"Send native ping"* ]]; then
     break
   fi
@@ -115,8 +115,8 @@ while true; do
     CONVEX_URL="http://127.0.0.1:$convex_port" \
       bun "$root/backend/test/latest-event.ts"
   )
-  "$adb" -s "$serial" shell uiautomator dump /sdcard/sambu-window.xml >/dev/null
-  ui="$("$adb" -s "$serial" shell cat /sdcard/sambu-window.xml)"
+  "$adb" -s "$serial" shell uiautomator dump /sdcard/starter-window.xml >/dev/null
+  ui="$("$adb" -s "$serial" shell cat /sdcard/starter-window.xml)"
   if [[ "$latest_id" != "$before_id" && "$latest_client" == "android" && "$ui" == *'text="Android"'* ]]; then
     break
   fi

@@ -89,8 +89,8 @@ build_app() {
 
   if ! "$xcodebuild_bin" build \
     -quiet \
-    -project "$root/apps/ios/Sambu.xcodeproj" \
-    -scheme Sambu \
+    -project "$root/apps/ios/Starter.xcodeproj" \
+    -scheme Starter \
     -configuration Debug \
     -destination "platform=iOS,id=$device_id" \
     -derivedDataPath "$derived_data" \
@@ -102,7 +102,7 @@ build_app() {
     CONVEX_URL="$backend_url" >"$build_log" 2>&1; then
     tail -n 80 "$build_log" >&2
     fail \
-      'Xcode could not build and sign Sambu for the selected iPhone.' \
+      'Xcode could not build and sign Starter for the selected iPhone.' \
       'Inspect the build diagnostics above, fix Xcode signing or compilation, then retry ios-device.'
   fi
 }
@@ -112,12 +112,12 @@ launch_app() {
   local device_name="$2"
   local development_team="$3"
   local backend_url="$4"
-  local app="$derived_data/Build/Products/Debug-iphoneos/Sambu.app"
+  local app="$derived_data/Build/Products/Debug-iphoneos/Starter.app"
 
   build_app "$device_id" "$development_team" "$backend_url"
   if [[ ! -d "$app" ]]; then
     fail \
-      'Xcode reported success without producing Sambu.app.' \
+      'Xcode reported success without producing Starter.app.' \
       'Inspect the Xcode build output and the configured DerivedData path.'
   fi
 
@@ -127,7 +127,7 @@ launch_app() {
   if ! install_output="$("$xcrun_bin" devicectl device install app --device "$device_id" "$app" 2>&1)"; then
     printf '%s\n' "$install_output" >&2
     fail \
-      'CoreDevice could not install Sambu on the selected iPhone.' \
+      'CoreDevice could not install Starter on the selected iPhone.' \
       'Reconnect and unlock the iPhone, verify Developer Mode, then retry ios-device.'
   fi
 
@@ -139,11 +139,11 @@ launch_app() {
     printf '%s\n' "$launch_output" >&2
     if [[ "$launch_output" == *'reason: Locked'* || "$launch_output" == *'FBSOpenApplicationErrorDomain error 7'* ]]; then
       fail \
-        'Sambu was installed, but the iPhone locked before it could launch.' \
+        'Starter was installed, but the iPhone locked before it could launch.' \
         'Unlock the iPhone, keep its screen awake, then retry ios-device.'
     fi
     fail \
-      'Sambu was installed, but CoreDevice could not launch it.' \
+      'Starter was installed, but CoreDevice could not launch it.' \
       'Reconnect and unlock the iPhone, verify Developer Mode, then retry ios-device.'
   fi
 
@@ -188,15 +188,15 @@ run_e2e() {
   printf 'Keep %s unlocked with its screen awake while XCTest runs.\n' "$device_name" >&2
   if ! "$xcodebuild_bin" test \
     -quiet \
-    -project "$root/apps/ios/Sambu.xcodeproj" \
-    -scheme Sambu \
+    -project "$root/apps/ios/Starter.xcodeproj" \
+    -scheme Starter \
     -configuration Debug \
     -destination "platform=iOS,id=$device_id" \
     -destination-timeout 30 \
     -derivedDataPath "$derived_data" \
     -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
     -resultBundlePath "$result_bundle" \
-    -only-testing:SambuUITests \
+    -only-testing:StarterUITests \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
     DEVELOPMENT_TEAM="$development_team" \

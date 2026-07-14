@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "600000000000000000000001"
-               BuildableName = "Sambu.app"
-               BlueprintName = "Sambu"
-               ReferencedContainer = "container:Sambu.xcodeproj">
+               BuildableName = "Starter.app"
+               BlueprintName = "Starter"
+               ReferencedContainer = "container:Starter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -30,9 +30,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "600000000000000000000003"
-               BuildableName = "SambuUITests.xctest"
-               BlueprintName = "SambuUITests"
-               ReferencedContainer = "container:Sambu.xcodeproj">
+               BuildableName = "StarterUITests.xctest"
+               BlueprintName = "StarterUITests"
+               ReferencedContainer = "container:Starter.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,18 +47,18 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "600000000000000000000002"
-               BuildableName = "SambuTests.xctest"
-               BlueprintName = "SambuTests"
-               ReferencedContainer = "container:Sambu.xcodeproj">
+               BuildableName = "StarterTests.xctest"
+               BlueprintName = "StarterTests"
+               ReferencedContainer = "container:Starter.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference skipped = "NO" parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "600000000000000000000003"
-               BuildableName = "SambuUITests.xctest"
-               BlueprintName = "SambuUITests"
-               ReferencedContainer = "container:Sambu.xcodeproj">
+               BuildableName = "StarterUITests.xctest"
+               BlueprintName = "StarterUITests"
+               ReferencedContainer = "container:Starter.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -77,9 +77,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "600000000000000000000001"
-            BuildableName = "Sambu.app"
-            BlueprintName = "Sambu"
-            ReferencedContainer = "container:Sambu.xcodeproj">
+            BuildableName = "Starter.app"
+            BlueprintName = "Starter"
+            ReferencedContainer = "container:Starter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -93,9 +93,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "600000000000000000000001"
-            BuildableName = "Sambu.app"
-            BlueprintName = "Sambu"
-            ReferencedContainer = "container:Sambu.xcodeproj">
+            BuildableName = "Starter.app"
+            BlueprintName = "Starter"
+            ReferencedContainer = "container:Starter.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

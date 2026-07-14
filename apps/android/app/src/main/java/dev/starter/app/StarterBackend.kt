@@ -1,4 +1,4 @@
-package dev.sambu.app
+package dev.starter.app
 
 import dev.convex.android.ConvexClient
 import kotlinx.coroutines.flow.Flow
@@ -13,15 +13,15 @@ data class BootstrapEvent(
   val message: String,
 )
 
-interface SambuBackend {
+interface StarterBackend {
   fun bootstrapEvents(): Flow<Result<List<BootstrapEvent>>>
 
   suspend fun ping()
 }
 
-class LiveSambuConvexApi(
+class LiveStarterConvexApi(
   private val client: ConvexClient,
-) : SambuBackend {
+) : StarterBackend {
   private object Function {
     const val BootstrapList = "bootstrap:list"
     const val BootstrapPing = "bootstrap:ping"

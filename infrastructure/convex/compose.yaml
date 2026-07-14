@@ -1,10 +1,10 @@
-name: "${COMPOSE_PROJECT_NAME:-sambu}"
+name: "${COMPOSE_PROJECT_NAME:-starter}"
 
 services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: "${CONVEX_DATABASE_NAME:-sambu_local}"
+      POSTGRES_DB: "${CONVEX_DATABASE_NAME:-starter_local}"
       POSTGRES_PASSWORD: convex-local
       POSTGRES_USER: convex
     ports:
@@ -24,7 +24,7 @@ services:
         condition: service_healthy
     environment:
       DO_NOT_REQUIRE_SSL: "1"
-      INSTANCE_NAME: "${CONVEX_INSTANCE_NAME:-sambu-local}"
+      INSTANCE_NAME: "${CONVEX_INSTANCE_NAME:-starter-local}"
       INSTANCE_SECRET: "${CONVEX_INSTANCE_SECRET:?Set CONVEX_INSTANCE_SECRET to a 64-character hexadecimal development secret}"
       POSTGRES_URL: postgresql://convex:convex-local@postgres:5432
       RUST_LOG: info

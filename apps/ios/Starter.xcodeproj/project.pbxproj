@@ -7,16 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		100000000000000000000001 /* SambuApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* SambuApp.swift */; };
+		100000000000000000000001 /* StarterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000001 /* StarterApp.swift */; };
 		100000000000000000000002 /* AppConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000002 /* AppConfiguration.swift */; };
-		100000000000000000000003 /* SambuConvexAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* SambuConvexAPI.swift */; };
+		100000000000000000000003 /* StarterConvexAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000003 /* StarterConvexAPI.swift */; };
 		100000000000000000000004 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000004 /* HomeViewModel.swift */; };
 		100000000000000000000005 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000005 /* HomeView.swift */; };
 		100000000000000000000006 /* RootTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000006 /* RootTabView.swift */; };
 		100000000000000000000007 /* BootstrapEventDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000007 /* BootstrapEventDecodingTests.swift */; };
 		100000000000000000000008 /* bootstrap-event.json in Resources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000008 /* bootstrap-event.json */; };
 		100000000000000000000009 /* ConvexMobile in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000002 /* ConvexMobile */; };
-		10000000000000000000000A /* SambuUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* SambuUITests.swift */; };
+		10000000000000000000000A /* StarterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* StarterUITests.swift */; };
 		10000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000E /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -26,31 +26,31 @@
 			containerPortal = 800000000000000000000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 600000000000000000000001;
-			remoteInfo = Sambu;
+			remoteInfo = Starter;
 		};
 		300000000000000000000003 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 800000000000000000000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 600000000000000000000001;
-			remoteInfo = Sambu;
+			remoteInfo = Starter;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		200000000000000000000001 /* SambuApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SambuApp.swift; sourceTree = "<group>"; };
+		200000000000000000000001 /* StarterApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterApp.swift; sourceTree = "<group>"; };
 		200000000000000000000002 /* AppConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfiguration.swift; sourceTree = "<group>"; };
-		200000000000000000000003 /* SambuConvexAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SambuConvexAPI.swift; sourceTree = "<group>"; };
+		200000000000000000000003 /* StarterConvexAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterConvexAPI.swift; sourceTree = "<group>"; };
 		200000000000000000000004 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		200000000000000000000005 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		200000000000000000000006 /* RootTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootTabView.swift; sourceTree = "<group>"; };
 		200000000000000000000007 /* BootstrapEventDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BootstrapEventDecodingTests.swift; sourceTree = "<group>"; };
 		200000000000000000000008 /* bootstrap-event.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; name = "bootstrap-event.json"; path = "../../contracts/fixtures/bootstrap-event.json"; sourceTree = SOURCE_ROOT; };
 		200000000000000000000009 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		20000000000000000000000A /* Sambu.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sambu.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		20000000000000000000000B /* SambuTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SambuTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		20000000000000000000000C /* SambuUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SambuUITests.swift; sourceTree = "<group>"; };
-		20000000000000000000000D /* SambuUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SambuUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		20000000000000000000000A /* Starter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Starter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		20000000000000000000000B /* StarterTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarterTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		20000000000000000000000C /* StarterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterUITests.swift; sourceTree = "<group>"; };
+		20000000000000000000000D /* StarterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -83,18 +83,18 @@
 		500000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				500000000000000000000002 /* Sambu */,
-				500000000000000000000006 /* SambuTests */,
-				500000000000000000000009 /* SambuUITests */,
+				500000000000000000000002 /* Starter */,
+				500000000000000000000006 /* StarterTests */,
+				500000000000000000000009 /* StarterUITests */,
 				500000000000000000000007 /* Contracts */,
 				500000000000000000000008 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		500000000000000000000002 /* Sambu */ = {
+		500000000000000000000002 /* Starter */ = {
 			isa = PBXGroup;
 			children = (
-				200000000000000000000001 /* SambuApp.swift */,
+				200000000000000000000001 /* StarterApp.swift */,
 				200000000000000000000002 /* AppConfiguration.swift */,
 				200000000000000000000006 /* RootTabView.swift */,
 				20000000000000000000000E /* Assets.xcassets */,
@@ -102,13 +102,13 @@
 				500000000000000000000004 /* Features */,
 				200000000000000000000009 /* Info.plist */,
 			);
-			path = Sambu;
+			path = Starter;
 			sourceTree = "<group>";
 		};
 		500000000000000000000003 /* Backend */ = {
 			isa = PBXGroup;
 			children = (
-				200000000000000000000003 /* SambuConvexAPI.swift */,
+				200000000000000000000003 /* StarterConvexAPI.swift */,
 			);
 			path = Backend;
 			sourceTree = "<group>";
@@ -130,20 +130,20 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
-		500000000000000000000006 /* SambuTests */ = {
+		500000000000000000000006 /* StarterTests */ = {
 			isa = PBXGroup;
 			children = (
 				200000000000000000000007 /* BootstrapEventDecodingTests.swift */,
 			);
-			path = SambuTests;
+			path = StarterTests;
 			sourceTree = "<group>";
 		};
-		500000000000000000000009 /* SambuUITests */ = {
+		500000000000000000000009 /* StarterUITests */ = {
 			isa = PBXGroup;
 			children = (
-				20000000000000000000000C /* SambuUITests.swift */,
+				20000000000000000000000C /* StarterUITests.swift */,
 			);
-			path = SambuUITests;
+			path = StarterUITests;
 			sourceTree = "<group>";
 		};
 		500000000000000000000007 /* Contracts */ = {
@@ -157,9 +157,9 @@
 		500000000000000000000008 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				20000000000000000000000A /* Sambu.app */,
-				20000000000000000000000B /* SambuTests.xctest */,
-				20000000000000000000000D /* SambuUITests.xctest */,
+				20000000000000000000000A /* Starter.app */,
+				20000000000000000000000B /* StarterTests.xctest */,
+				20000000000000000000000D /* StarterUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -167,9 +167,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		600000000000000000000001 /* Sambu */ = {
+		600000000000000000000001 /* Starter */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 900000000000000000000002 /* Build configuration list for PBXNativeTarget "Sambu" */;
+			buildConfigurationList = 900000000000000000000002 /* Build configuration list for PBXNativeTarget "Starter" */;
 			buildPhases = (
 				700000000000000000000001 /* Sources */,
 				400000000000000000000001 /* Frameworks */,
@@ -179,17 +179,17 @@
 			);
 			dependencies = (
 			);
-			name = Sambu;
+			name = Starter;
 			packageProductDependencies = (
 				A00000000000000000000002 /* ConvexMobile */,
 			);
-			productName = Sambu;
-			productReference = 20000000000000000000000A /* Sambu.app */;
+			productName = Starter;
+			productReference = 20000000000000000000000A /* Starter.app */;
 			productType = "com.apple.product-type.application";
 		};
-		600000000000000000000002 /* SambuTests */ = {
+		600000000000000000000002 /* StarterTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 900000000000000000000003 /* Build configuration list for PBXNativeTarget "SambuTests" */;
+			buildConfigurationList = 900000000000000000000003 /* Build configuration list for PBXNativeTarget "StarterTests" */;
 			buildPhases = (
 				700000000000000000000003 /* Sources */,
 				400000000000000000000002 /* Frameworks */,
@@ -200,14 +200,14 @@
 			dependencies = (
 				300000000000000000000002 /* PBXTargetDependency */,
 			);
-			name = SambuTests;
-			productName = SambuTests;
-			productReference = 20000000000000000000000B /* SambuTests.xctest */;
+			name = StarterTests;
+			productName = StarterTests;
+			productReference = 20000000000000000000000B /* StarterTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		600000000000000000000003 /* SambuUITests */ = {
+		600000000000000000000003 /* StarterUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 900000000000000000000004 /* Build configuration list for PBXNativeTarget "SambuUITests" */;
+			buildConfigurationList = 900000000000000000000004 /* Build configuration list for PBXNativeTarget "StarterUITests" */;
 			buildPhases = (
 				700000000000000000000005 /* Sources */,
 				400000000000000000000003 /* Frameworks */,
@@ -218,9 +218,9 @@
 			dependencies = (
 				300000000000000000000004 /* PBXTargetDependency */,
 			);
-			name = SambuUITests;
-			productName = SambuUITests;
-			productReference = 20000000000000000000000D /* SambuUITests.xctest */;
+			name = StarterUITests;
+			productName = StarterUITests;
+			productReference = 20000000000000000000000D /* StarterUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -246,7 +246,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 900000000000000000000001 /* Build configuration list for PBXProject "Sambu" */;
+			buildConfigurationList = 900000000000000000000001 /* Build configuration list for PBXProject "Starter" */;
 			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -264,9 +264,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				600000000000000000000001 /* Sambu */,
-				600000000000000000000002 /* SambuTests */,
-				600000000000000000000003 /* SambuUITests */,
+				600000000000000000000001 /* Starter */,
+				600000000000000000000002 /* StarterTests */,
+				600000000000000000000003 /* StarterUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -302,9 +302,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				100000000000000000000001 /* SambuApp.swift in Sources */,
+				100000000000000000000001 /* StarterApp.swift in Sources */,
 				100000000000000000000002 /* AppConfiguration.swift in Sources */,
-				100000000000000000000003 /* SambuConvexAPI.swift in Sources */,
+				100000000000000000000003 /* StarterConvexAPI.swift in Sources */,
 				100000000000000000000004 /* HomeViewModel.swift in Sources */,
 				100000000000000000000005 /* HomeView.swift in Sources */,
 				100000000000000000000006 /* RootTabView.swift in Sources */,
@@ -323,7 +323,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				10000000000000000000000A /* SambuUITests.swift in Sources */,
+				10000000000000000000000A /* StarterUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -332,12 +332,12 @@
 /* Begin PBXTargetDependency section */
 		300000000000000000000002 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 600000000000000000000001 /* Sambu */;
+			target = 600000000000000000000001 /* Starter */;
 			targetProxy = 300000000000000000000001 /* PBXContainerItemProxy */;
 		};
 		300000000000000000000004 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 600000000000000000000001 /* Sambu */;
+			target = 600000000000000000000001 /* Starter */;
 			targetProxy = 300000000000000000000003 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -465,7 +465,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Sambu/Info.plist;
+				INFOPLIST_FILE = Starter/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -474,7 +474,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.app;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -492,14 +492,14 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = Sambu/Info.plist;
+				INFOPLIST_FILE = Starter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.app;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -518,12 +518,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.appTests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sambu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sambu";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Starter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Starter";
 			};
 			name = Debug;
 		};
@@ -537,12 +537,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.appTests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.appTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Sambu.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Sambu";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Starter.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Starter";
 			};
 			name = Release;
 		};
@@ -555,12 +555,12 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.appUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Sambu;
+				TEST_TARGET_NAME = Starter;
 			};
 			name = Debug;
 		};
@@ -573,19 +573,19 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.sambu.appUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.starter.appUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_STRICT_CONCURRENCY = complete;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Sambu;
+				TEST_TARGET_NAME = Starter;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		900000000000000000000001 /* Build configuration list for PBXProject "Sambu" */ = {
+		900000000000000000000001 /* Build configuration list for PBXProject "Starter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B00000000000000000000001 /* Debug */,
@@ -594,7 +594,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		900000000000000000000002 /* Build configuration list for PBXNativeTarget "Sambu" */ = {
+		900000000000000000000002 /* Build configuration list for PBXNativeTarget "Starter" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B00000000000000000000003 /* Debug */,
@@ -603,7 +603,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		900000000000000000000003 /* Build configuration list for PBXNativeTarget "SambuTests" */ = {
+		900000000000000000000003 /* Build configuration list for PBXNativeTarget "StarterTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B00000000000000000000005 /* Debug */,
@@ -612,7 +612,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		900000000000000000000004 /* Build configuration list for PBXNativeTarget "SambuUITests" */ = {
+		900000000000000000000004 /* Build configuration list for PBXNativeTarget "StarterUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				B00000000000000000000007 /* Debug */,

@@ -1,5 +1,5 @@
 import XCTest
-@testable import Sambu
+@testable import Starter
 
 final class BootstrapEventDecodingTests: XCTestCase {
   func testDecodesDeployedWireFixture() throws {
@@ -16,6 +16,6 @@ final class BootstrapEventDecodingTests: XCTestCase {
     )
 
     XCTAssertEqual(event.client, "test")
-    XCTAssertEqual(event.message, "Sambu backend is connected")
+    XCTAssertEqual(event.message, "Backend is connected")
   }
 }

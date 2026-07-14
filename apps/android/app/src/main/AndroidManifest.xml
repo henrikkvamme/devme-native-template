@@ -3,13 +3,13 @@
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application
-    android:name=".SambuApplication"
+    android:name=".StarterApplication"
     android:allowBackup="true"
     android:icon="@drawable/ic_launcher"
-    android:label="Sambu"
+    android:label="Starter"
     android:roundIcon="@drawable/ic_launcher"
     android:supportsRtl="true"
-    android:theme="@style/Theme.Sambu">
+    android:theme="@style/Theme.Starter">
     <activity
       android:name=".MainActivity"
       android:exported="true">

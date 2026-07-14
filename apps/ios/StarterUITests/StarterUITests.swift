@@ -1,6 +1,6 @@
 import XCTest
 
-final class SambuUITests: XCTestCase {
+final class StarterUITests: XCTestCase {
   override func setUpWithError() throws {
     continueAfterFailure = false
   }
@@ -23,7 +23,7 @@ final class SambuUITests: XCTestCase {
     )
 
     let attachment = XCTAttachment(screenshot: app.screenshot())
-    attachment.name = "Sambu iOS native Convex round trip"
+    attachment.name = "Starter iOS native Convex round trip"
     attachment.lifetime = .keepAlways
     add(attachment)
   }

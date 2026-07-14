@@ -1,4 +1,4 @@
-package dev.sambu.app
+package dev.starter.app
 
 import android.content.pm.PackageManager
 import android.os.Build
@@ -23,7 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -70,14 +70,14 @@ class MainActivity : ComponentActivity() {
       PackageManager.PERMISSION_GRANTED
 
   private fun showContent() {
-    val backend = (application as SambuApplication).backend
+    val backend = (application as StarterApplication).backend
 
     setContent {
       MaterialTheme {
         val homeViewModel: HomeViewModel = viewModel(
           factory = HomeViewModel.Factory(backend),
         )
-        SambuRoot(homeViewModel)
+        StarterRoot(homeViewModel)
       }
     }
   }
@@ -88,12 +88,12 @@ private enum class Tab(
   val icon: ImageVector,
 ) {
   Home("Home", Icons.Default.Home),
-  Shopping("Shopping", Icons.Default.ShoppingCart),
-  Chores("Chores", Icons.Default.Checklist),
+  Activity("Activity", Icons.Default.Checklist),
+  Settings("Settings", Icons.Default.Settings),
 }
 
 @Composable
-private fun SambuRoot(homeViewModel: HomeViewModel) {
+private fun StarterRoot(homeViewModel: HomeViewModel) {
   var selectedTab by remember { mutableStateOf(Tab.Home) }
 
   Scaffold(
@@ -112,8 +112,8 @@ private fun SambuRoot(homeViewModel: HomeViewModel) {
   ) { padding ->
     when (selectedTab) {
       Tab.Home -> HomeScreen(homeViewModel, padding)
-      Tab.Shopping -> PlaceholderScreen("Shopping", padding)
-      Tab.Chores -> PlaceholderScreen("Chores", padding)
+      Tab.Activity -> PlaceholderScreen("Activity", padding)
+      Tab.Settings -> PlaceholderScreen("Settings", padding)
     }
   }
 }
@@ -133,7 +133,7 @@ private fun HomeScreen(
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     item {
-      Text("Sambu", style = MaterialTheme.typography.displaySmall)
+      Text("Starter", style = MaterialTheme.typography.displaySmall)
       Spacer(Modifier.height(8.dp))
       ConnectionCard(state, viewModel::sendPing)
       Spacer(Modifier.height(24.dp))
@@ -214,6 +214,6 @@ private fun PlaceholderScreen(
       .padding(24.dp),
   ) {
     Text(title, style = MaterialTheme.typography.displaySmall)
-    Text("This feature will be implemented as a native flow.")
+    Text("Replace this tab with your native feature.")
   }
 }

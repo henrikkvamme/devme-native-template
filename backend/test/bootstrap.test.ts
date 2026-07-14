@@ -19,7 +19,7 @@ describe("bootstrap contract", () => {
       const events = yield* backend.query(refs.public.bootstrap.list, {});
       assertEquals(events.length, 1);
       assertEquals(events[0]?.client, "test");
-      assertEquals(events[0]?.message, "Sambu backend is connected");
+      assertEquals(events[0]?.message, "Backend is connected");
     }).pipe(Effect.provide(TestConfect.layer())),
   );
 });

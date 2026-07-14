@@ -56,8 +56,8 @@ IFS=$'\t' read -r simulator_udid simulator_name <<<"$simulator_record"
 mkdir -p "$root/.devme"
 if ! "$xcodebuild_bin" build \
   -quiet \
-  -project "$root/apps/ios/Sambu.xcodeproj" \
-  -scheme Sambu \
+  -project "$root/apps/ios/Starter.xcodeproj" \
+  -scheme Starter \
   -configuration Debug \
   -destination "platform=iOS Simulator,id=$simulator_udid" \
   -derivedDataPath "$derived_data" \
@@ -66,14 +66,14 @@ if ! "$xcodebuild_bin" build \
   CONVEX_URL="http://127.0.0.1:$convex_port" >"$build_log" 2>&1; then
   tail -n 80 "$build_log" >&2
   fail \
-    'Xcode could not build Sambu for the selected simulator.' \
+    'Xcode could not build Starter for the selected simulator.' \
     'Inspect the build diagnostics above, fix Xcode or compilation, then retry.'
 fi
 
-readonly app="$derived_data/Build/Products/Debug-iphonesimulator/Sambu.app"
+readonly app="$derived_data/Build/Products/Debug-iphonesimulator/Starter.app"
 if [[ ! -d "$app" ]]; then
   fail \
-    'Xcode reported success without producing Sambu.app.' \
+    'Xcode reported success without producing Starter.app.' \
     'Inspect the Xcode build output and the configured DerivedData path.'
 fi
 
@@ -85,12 +85,12 @@ fi
 readonly bundle_id="$("$plist_buddy_bin" -c 'Print :CFBundleIdentifier' "$app/Info.plist")"
 if ! "$xcrun_bin" simctl install "$simulator_udid" "$app" >/dev/null; then
   fail \
-    'Simulator could not install Sambu.' \
+    'Simulator could not install Starter.' \
     'Restart the selected simulator, then retry.'
 fi
 if ! "$xcrun_bin" simctl launch --terminate-running-process "$simulator_udid" "$bundle_id" >/dev/null; then
   fail \
-    'Simulator installed Sambu but could not launch it.' \
+    'Simulator installed Starter but could not launch it.' \
     'Open Simulator, inspect its state, then retry.'
 fi
 open -a Simulator >/dev/null 2>&1 || true

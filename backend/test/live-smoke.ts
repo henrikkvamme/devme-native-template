@@ -20,7 +20,7 @@ await client.mutation(api.bootstrap.ping, { client: "test" });
 const events = await client.query(api.bootstrap.list, {});
 const latest = events.at(0);
 
-if (latest?.client !== "test" || latest.message !== "Sambu backend is connected") {
+if (latest?.client !== "test" || latest.message !== "Backend is connected") {
   throw new Error(`Unexpected bootstrap response: ${JSON.stringify(latest)}`);
 }
 

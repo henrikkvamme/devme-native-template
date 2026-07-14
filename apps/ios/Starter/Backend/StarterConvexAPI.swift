@@ -13,13 +13,13 @@ struct BootstrapEvent: Codable, Equatable, Identifiable, Sendable {
 }
 
 @MainActor
-protocol SambuBackend {
+protocol StarterBackend {
   func bootstrapEvents() -> AnyPublisher<[BootstrapEvent], Error>
   func ping() async throws
 }
 
 @MainActor
-final class LiveSambuConvexAPI: SambuBackend {
+final class LiveStarterConvexAPI: StarterBackend {
   private enum Function {
     static let bootstrapList = "bootstrap:list"
     static let bootstrapPing = "bootstrap:ping"

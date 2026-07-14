@@ -13,10 +13,10 @@ final class HomeViewModel: ObservableObject {
   @Published private(set) var events: [BootstrapEvent] = []
   @Published private(set) var isSendingPing = false
 
-  private let backend: SambuBackend
+  private let backend: StarterBackend
   private var subscription: AnyCancellable?
 
-  init(backend: SambuBackend) {
+  init(backend: StarterBackend) {
     self.backend = backend
   }
 

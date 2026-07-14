@@ -30,13 +30,13 @@ while (($#)); do
     shift
   fi
 done
-mkdir -p "$derived_data/Build/Products/Debug-iphonesimulator/Sambu.app"
-: >"$derived_data/Build/Products/Debug-iphonesimulator/Sambu.app/Info.plist"
+mkdir -p "$derived_data/Build/Products/Debug-iphonesimulator/Starter.app"
+: >"$derived_data/Build/Products/Debug-iphonesimulator/Starter.app/Info.plist"
 EOF
 
 cat >"$temp/plistbuddy" <<'EOF'
 #!/usr/bin/env bash
-printf 'dev.sambu.app\n'
+printf 'dev.starter.app\n'
 EOF
 
 chmod +x "$temp/xcrun" "$temp/xcodebuild" "$temp/plistbuddy"
@@ -51,9 +51,9 @@ output="$({
 })"
 
 [[ "$output" == *'status: launched'* ]]
-[[ "$output" == *'bundle_id: "dev.sambu.app"'* ]]
+[[ "$output" == *'bundle_id: "dev.starter.app"'* ]]
 grep -Fq 'simctl install AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE' "$FAKE_LOG"
-grep -Fq 'simctl launch --terminate-running-process AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE dev.sambu.app' "$FAKE_LOG"
+grep -Fq 'simctl launch --terminate-running-process AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE dev.starter.app' "$FAKE_LOG"
 
 if SIMULATOR_LIST_EMPTY=1 \
   XCRUN_BIN="$temp/xcrun" \

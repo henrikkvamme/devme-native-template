@@ -1,4 +1,4 @@
-package dev.sambu.app
+package dev.starter.app
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -14,6 +14,6 @@ class BootstrapEventDecodingTest {
     val event = Json.decodeFromString<BootstrapEvent>(fixture)
 
     assertEquals("test", event.client)
-    assertEquals("Sambu backend is connected", event.message)
+    assertEquals("Backend is connected", event.message)
   }
 }

@@ -8,7 +8,7 @@ depends_on = ["root::bun"]
 
 [task.simulator]
 kind = "launch"
-description = "Build and launch Sambu in the iOS Simulator"
+description = "Build and launch Starter in the iOS Simulator"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-simulator.sh"
 depends_on = ["backend::deploy"]
 steps = ["root::dependencies"]
@@ -17,7 +17,7 @@ timeout = 1200
 
 [task.device]
 kind = "launch"
-description = "Build, install, and launch Sambu on a connected iPhone"
+description = "Build, install, and launch Starter on a connected iPhone"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-device.sh launch"
 depends_on = ["device-backend"]
 steps = ["root::dependencies", "tailscale"]

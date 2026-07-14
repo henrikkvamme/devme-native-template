@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RootTabView: View {
-  let backend: SambuBackend
+  let backend: StarterBackend
 
   var body: some View {
     TabView {
@@ -14,22 +14,22 @@ struct RootTabView: View {
 
       NavigationStack {
         PlaceholderView(
-          title: "Shopping",
-          systemImage: "cart.fill"
+          title: "Activity",
+          systemImage: "clock.arrow.circlepath"
         )
       }
       .tabItem {
-        Label("Shopping", systemImage: "cart.fill")
+        Label("Activity", systemImage: "clock.arrow.circlepath")
       }
 
       NavigationStack {
         PlaceholderView(
-          title: "Chores",
-          systemImage: "checklist"
+          title: "Settings",
+          systemImage: "gearshape.fill"
         )
       }
       .tabItem {
-        Label("Chores", systemImage: "checklist")
+        Label("Settings", systemImage: "gearshape.fill")
       }
     }
   }
@@ -43,7 +43,7 @@ private struct PlaceholderView: View {
     ContentUnavailableView(
       title,
       systemImage: systemImage,
-      description: Text("This feature will be implemented as a native flow.")
+      description: Text("Replace this tab with your native feature.")
     )
     .navigationTitle(title)
   }

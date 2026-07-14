@@ -20,7 +20,7 @@ const ping = FunctionImpl.make(databaseSchema, bootstrap, "ping", ({ client }) =
 
     return yield* writer.table("bootstrapEvents").insert({
       client,
-      message: "Sambu backend is connected",
+      message: "Backend is connected",
     });
   }).pipe(Effect.orDie),
 );

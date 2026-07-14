@@ -3,7 +3,7 @@ import SwiftUI
 struct HomeView: View {
   @StateObject private var viewModel: HomeViewModel
 
-  init(backend: SambuBackend) {
+  init(backend: StarterBackend) {
     _viewModel = StateObject(wrappedValue: HomeViewModel(backend: backend))
   }
 
@@ -44,7 +44,7 @@ struct HomeView: View {
         }
       }
     }
-    .navigationTitle("Sambu")
+    .navigationTitle("Starter")
     .task { viewModel.start() }
   }
 
