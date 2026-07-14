@@ -41,7 +41,6 @@ xcodebuild test \
   -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
   -resultBundlePath "$result_bundle" \
   -only-testing:StarterUITests \
-  CODE_SIGNING_ALLOWED=NO \
   CONVEX_URL="http://127.0.0.1:$convex_port" \
   AUTH_SITE_URL="http://127.0.0.1:$auth_site_port"
 

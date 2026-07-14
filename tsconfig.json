@@ -13,5 +13,5 @@
     "target": "ES2024",
     "types": ["bun-types", "vitest/globals"]
   },
-  "include": ["backend/**/*.ts", "vite.config.ts"]
+  "include": ["backend/**/*.ts", "tooling/**/*.ts", "vite.config.ts"]
 }

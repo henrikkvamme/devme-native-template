@@ -4,6 +4,7 @@ import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import { stripe } from "@better-auth/stripe";
 import { betterAuth, type BetterAuthOptions } from "better-auth/minimal";
 import { bearer } from "better-auth/plugins";
+import { importPKCS8, SignJWT } from "jose";
 import Stripe from "stripe";
 
 import { components } from "../_generated/api";
@@ -14,6 +15,21 @@ import schema from "./schema";
 const trimmedNonEmpty = (value: string | undefined): string | undefined => {
   const trimmed = value?.trim();
   return trimmed ? trimmed : undefined;
+};
+
+const authBaseURL = () => {
+  const fallback = trimmedNonEmpty(process.env.CONVEX_SITE_URL);
+  if (!fallback) return undefined;
+
+  const configuredHosts = (process.env.BETTER_AUTH_ALLOWED_HOSTS ?? "")
+    .split(",")
+    .map((host) => host.trim())
+    .filter((host) => host.length > 0);
+  return {
+    allowedHosts: [...new Set([new URL(fallback).host, ...configuredHosts])],
+    fallback,
+    protocol: "auto" as const,
+  };
 };
 
 const googleProvider = () => {
@@ -30,11 +46,40 @@ const googleProvider = () => {
 
 const appleProvider = () => {
   const clientId = trimmedNonEmpty(process.env.APPLE_CLIENT_ID);
-  const clientSecret = trimmedNonEmpty(process.env.APPLE_CLIENT_SECRET);
+  const teamId = trimmedNonEmpty(process.env.APPLE_TEAM_ID);
+  const keyId = trimmedNonEmpty(process.env.APPLE_KEY_ID);
+  const privateKey = trimmedNonEmpty(process.env.APPLE_PRIVATE_KEY);
   const appBundleIdentifier = trimmedNonEmpty(process.env.APPLE_APP_BUNDLE_IDENTIFIER);
 
-  if (!clientId || !clientSecret || !appBundleIdentifier) return undefined;
-  return { clientId, clientSecret, appBundleIdentifier };
+  const values = { clientId, teamId, keyId, privateKey, appBundleIdentifier };
+  const configured = Object.values(values).filter((value) => value !== undefined).length;
+  if (configured === 0) return undefined;
+
+  const missing = Object.entries(values)
+    .filter(([, value]) => value === undefined)
+    .map(([name]) => name);
+  if (missing.length > 0) {
+    throw new Error(`Apple auth configuration is incomplete: ${missing.join(", ")}`);
+  }
+
+  return async () => {
+    const now = Math.floor(Date.now() / 1000);
+    const signingKey = await importPKCS8(privateKey!, "ES256");
+    const clientSecret = await new SignJWT({})
+      .setProtectedHeader({ alg: "ES256", kid: keyId! })
+      .setIssuer(teamId!)
+      .setSubject(clientId!)
+      .setAudience("https://appleid.apple.com")
+      .setIssuedAt(now)
+      .setExpirationTime(now + 180 * 24 * 60 * 60)
+      .sign(signingKey);
+
+    return {
+      clientId: [...new Set([clientId!, appBundleIdentifier!])],
+      clientSecret,
+      appBundleIdentifier: appBundleIdentifier!,
+    };
+  };
 };
 
 const stripeClient = new Stripe(
@@ -56,7 +101,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
 
   return {
     appName: trimmedNonEmpty(process.env.AUTH_APP_NAME) ?? "Starter",
-    baseURL: process.env.CONVEX_SITE_URL,
+    baseURL: authBaseURL(),
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: {
@@ -66,7 +111,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
       ...(google ? { google } : {}),
       ...(apple ? { apple } : {}),
     },
-    trustedOrigins: ["https://appleid.apple.com"],
+    trustedOrigins: ["https://appleid.apple.com", "starter://billing"],
     plugins: [
       bearer({ requireSignature: true }),
       stripe({

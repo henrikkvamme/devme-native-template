@@ -48,6 +48,23 @@ steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
 
+[task.auth-doctor]
+kind = "utility"
+description = "Show auth, provider, billing, and official-doc readiness without revealing secrets"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.auth-configure]
+kind = "utility"
+description = "Validate .env.auth.local, apply it to local Convex, and redeploy"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-configure"
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
 [task.contract-export]
 kind = "utility"
 description = "Export the deployed Convex function contract for native clients"

@@ -2,6 +2,45 @@
   "url": "",
   "functions": [
     {
+      "functionType": "HttpAction",
+      "method": "GET",
+      "path": "/.well-known/openid-configuration"
+    },
+    {
+      "functionType": "HttpAction",
+      "method": "GET",
+      "path": "/api/auth/*"
+    },
+    {
+      "functionType": "HttpAction",
+      "method": "POST",
+      "path": "/api/auth/*"
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:current",
+      "returns": null,
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Action",
+      "identifier": "auth.js:getLatestJwks",
+      "returns": null,
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
       "args": {
         "type": "object",
         "value": {}
@@ -91,45 +130,6 @@
         "tableName": "bootstrapEvents",
         "type": "id"
       },
-      "visibility": {
-        "kind": "public"
-      }
-    },
-    {
-      "functionType": "HttpAction",
-      "method": "GET",
-      "path": "/.well-known/openid-configuration"
-    },
-    {
-      "functionType": "HttpAction",
-      "method": "GET",
-      "path": "/api/auth/*"
-    },
-    {
-      "functionType": "HttpAction",
-      "method": "POST",
-      "path": "/api/auth/*"
-    },
-    {
-      "args": {
-        "type": "object",
-        "value": {}
-      },
-      "functionType": "Action",
-      "identifier": "auth.js:getLatestJwks",
-      "returns": null,
-      "visibility": {
-        "kind": "internal"
-      }
-    },
-    {
-      "args": {
-        "type": "object",
-        "value": {}
-      },
-      "functionType": "Query",
-      "identifier": "auth.js:current",
-      "returns": null,
       "visibility": {
         "kind": "public"
       }

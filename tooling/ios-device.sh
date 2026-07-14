@@ -88,6 +88,7 @@ build_app() {
   local backend_url="$3"
   local auth_site_url="$4"
 
+  rm -rf "$derived_data"
   if ! "$xcodebuild_bin" build \
     -quiet \
     -project "$root/apps/ios/Starter.xcodeproj" \
@@ -190,6 +191,7 @@ run_e2e() {
   IFS=$'\t' read -r before_id _ <<<"$before_event"
 
   rm -rf "$result_bundle" "$attachments"
+  rm -rf "$derived_data"
   printf 'Keep %s unlocked with its screen awake while XCTest runs.\n' "$device_name" >&2
   if ! "$xcodebuild_bin" test \
     -quiet \

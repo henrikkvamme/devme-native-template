@@ -23,7 +23,7 @@ set -euo pipefail
 if [[ "${1:-}" == "status" && "${2:-}" == "--json" ]]; then
   online="${TAILSCALE_PEER_ONLINE:-true}"
   self_online="${TAILSCALE_SELF_ONLINE:-true}"
-  printf '{"BackendState":"Running","Self":{"DNSName":"macbook.example.invalid.","Online":%s},"Peer":{"phone":{"DNSName":"iphone.example.invalid.","OS":"iOS","Online":%s}}}\n' "$self_online" "$online"
+  printf '{"BackendState":"Running","Self":{"DNSName":"macbook.example.ts.net.","Online":%s},"Peer":{"phone":{"DNSName":"iphone.example.ts.net.","OS":"iOS","Online":%s}}}\n' "$self_online" "$online"
   exit 0
 fi
 
@@ -44,7 +44,7 @@ if [[ "${1:-}" == "serve" && "${2:-}" == "status" && "${3:-}" == "--json" ]]; th
     if [[ -f "$state-$port" ]]; then
       [[ "$first" == true ]] || printf ','
       target="$(cat "$state-$port")"
-      printf '"macbook.example.invalid:%s":{"Handlers":{"/":{"Proxy":"%s"}}}' "$port" "$target"
+      printf '"macbook.example.ts.net:%s":{"Handlers":{"/":{"Proxy":"%s"}}}' "$port" "$target"
       first=false
     fi
   done
@@ -81,6 +81,12 @@ if [[ "${CURL_MODE:-success}" == "fail" ]]; then
   exit 7
 fi
 printf 'unknown'
+SCRIPT
+
+cat >"$fake_bin/convex-helper" <<'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'convex-helper %s\n' "$*" >>"$COMMAND_LOG"
 SCRIPT
 
 cat >"$fake_bin/bun" <<'SCRIPT'
@@ -177,37 +183,42 @@ assert_contains() {
 }
 
 device_url="$({
-  PATH="$fake_bin:$PATH" \
+PATH="$fake_bin:$PATH" \
     COMMAND_LOG="$command_log" \
     DEVME_SLOT=2 \
     "$root/tooling/tailscale-convex.sh" url
 })"
 
-if [[ "$device_url" != "https://macbook.example.invalid:8483" ]]; then
+if [[ "$device_url" != "https://macbook.example.ts.net:8483" ]]; then
   printf 'unexpected device URL: %s\n' "$device_url" >&2
   exit 1
 fi
 
-PATH="$fake_bin:$PATH" \
+  PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" ensure >/dev/null
 PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >/dev/null
 PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >"$temporary_directory/already-stopped.out"
 assert_contains "$temporary_directory/already-stopped.out" 'status: already-stopped'
 assert_contains "$command_log" 'tailscale serve --yes --bg --https=8443 http://127.0.0.1:3210'
 assert_contains "$command_log" 'tailscale serve --yes --bg --https=8444 http://127.0.0.1:3211'
+assert_contains "$command_log" 'convex-helper auth-host https://macbook.example.ts.net:8444'
 
 printf 'http://127.0.0.1:9999\n' >"$temporary_directory/serve-state-8443"
 mismatch_output="$temporary_directory/mismatch.out"
 if PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >"$mismatch_output"; then
   printf 'mismatched Tailscale target stop unexpectedly passed\n' >&2
@@ -258,8 +269,8 @@ PATH="$fake_bin:$PATH" \
   DEVME_SLOT=2 \
   "$root/tooling/ios-device.sh" launch >"$temporary_directory/launch.out"
 
-assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.invalid:8483'
-assert_contains "$command_log" 'AUTH_SITE_URL=https://macbook.example.invalid:8484'
+assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.ts.net:8483'
+assert_contains "$command_log" 'AUTH_SITE_URL=https://macbook.example.ts.net:8484'
 assert_contains "$command_log" 'DEVELOPMENT_TEAM=ABCDE12345'
 assert_contains "$command_log" 'platform=iOS,id=PHONE-1'
 assert_contains "$command_log" 'device install app --device PHONE-1'

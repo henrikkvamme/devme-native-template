@@ -12,6 +12,7 @@ readonly site_https_port="$(devme_tailscale_auth_https_port "$slot")"
 readonly tailscale_bin="${TAILSCALE_BIN:-tailscale}"
 readonly curl_bin="${CURL_BIN:-curl}"
 readonly bun_bin="${BUN_BIN:-bun}"
+readonly convex_helper="${CONVEX_HELPER_BIN:-$root/tooling/convex.sh}"
 stop_endpoint_status='already-stopped'
 
 fail() {
@@ -154,10 +155,12 @@ case "${1:-}" in
   ensure)
     ensure_endpoint "$https_port" "http://127.0.0.1:$convex_port" /version
     ensure_endpoint "$site_https_port" "http://127.0.0.1:$site_port" /api/auth/get-session
+    auth_site_url="$(device_url "$site_https_port")"
+    DEVME_SLOT="$slot" "$convex_helper" auth-host "$auth_site_url"
     printf 'result:\n'
     printf '  status: ready\n'
     printf '  backend_url: "%s"\n' "$(device_url "$https_port")"
-    printf '  auth_site_url: "%s"\n' "$(device_url "$site_https_port")"
+    printf '  auth_site_url: "%s"\n' "$auth_site_url"
     printf '  visibility: tailnet-only\n'
     ;;
   health)

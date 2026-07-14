@@ -141,6 +141,11 @@ case "${1:-}" in
       bunx convex function-spec | bun -e '
         const spec = await Bun.stdin.json();
         spec.url = "";
+        spec.functions.sort((left, right) => {
+          const leftKey = `${left.identifier ?? left.path}:${left.method ?? ""}`;
+          const rightKey = `${right.identifier ?? right.path}:${right.method ?? ""}`;
+          return leftKey.localeCompare(rightKey);
+        });
         console.log(JSON.stringify(spec, null, 2));
       ' >"$root/contracts/function-spec.json"
     ;;
@@ -154,6 +159,11 @@ case "${1:-}" in
       bunx convex function-spec | bun -e '
         const spec = await Bun.stdin.json();
         spec.url = "";
+        spec.functions.sort((left, right) => {
+          const leftKey = `${left.identifier ?? left.path}:${left.method ?? ""}`;
+          const rightKey = `${right.identifier ?? right.path}:${right.method ?? ""}`;
+          return leftKey.localeCompare(rightKey);
+        });
         console.log(JSON.stringify(spec, null, 2));
       ' >"$temporary_spec"
     if ! cmp -s "$root/contracts/function-spec.json" "$temporary_spec"; then
@@ -171,8 +181,60 @@ case "${1:-}" in
       AUTH_SITE_URL="http://127.0.0.1:$site_port" \
       bun "$root/backend/test/auth-live-smoke.ts"
     ;;
+  auth-configure)
+    shift
+    if [[ "$#" -gt 0 ]]; then
+      printf 'error: "auth-configure does not accept arguments"\n'
+      printf 'help[1]: "Edit .env.auth.local, then run the Devme task again."\n'
+      exit 2
+    fi
+    admin_key="$(admin_key)"
+    config_file="${AUTH_CONFIG_FILE:-$root/.env.auth.local}"
+    temporary_env="$(mktemp "${TMPDIR:-/tmp}/starter-auth.XXXXXX")"
+    trap 'rm -f "$temporary_env"' EXIT
+    chmod 600 "$temporary_env"
+    bun "$root/tooling/auth-config.ts" prepare --input "$config_file" --output "$temporary_env"
+    cd "$root/backend"
+    CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+      CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+      bunx convex env set --force --from-file "$temporary_env" >&2
+    "$root/tooling/convex.sh" deploy >&2
+    cd "$root"
+    bun "$root/tooling/auth-config.ts" applied --input "$config_file"
+    ;;
+  auth-doctor)
+    shift
+    admin_key="$(admin_key)"
+    cd "$root/backend"
+    environment="$(
+      CONVEX_SELF_HOSTED_URL="http://127.0.0.1:$convex_port" \
+        CONVEX_SELF_HOSTED_ADMIN_KEY="$admin_key" \
+        bunx convex env list
+    )"
+    printf '%s\n' "$environment" | \
+      CONVEX_URL="http://127.0.0.1:$convex_port" \
+      AUTH_SITE_URL="http://127.0.0.1:$site_port" \
+      bun "$root/tooling/auth-config.ts" doctor "$@"
+    ;;
+  auth-host)
+    shift
+    if [[ "$#" -ne 1 ]]; then
+      printf 'error: "auth-host requires one HTTPS URL"\n'
+      exit 2
+    fi
+    auth_host="$(AUTH_URL="$1" bun -e '
+      const url = new URL(process.env.AUTH_URL);
+      if (url.protocol !== "https:" || !url.hostname.endsWith(".ts.net")) process.exit(1);
+      console.log(url.host);
+    ')" || {
+      printf 'error: "auth-host only accepts a Tailscale HTTPS URL"\n'
+      exit 2
+    }
+    admin_key="$(admin_key)"
+    set_convex_env "$admin_key" BETTER_AUTH_ALLOWED_HOSTS "$auth_host"
+    ;;
   *)
-    printf 'Usage: %s {up|down|deploy|function-spec|function-spec-check|live-smoke|auth-live-smoke}\n' "$0" >&2
+    printf 'Usage: %s {up|down|deploy|function-spec|function-spec-check|live-smoke|auth-live-smoke|auth-configure|auth-doctor|auth-host}\n' "$0" >&2
     exit 64
     ;;
 esac
