@@ -39,4 +39,26 @@ final class NativeIdentityTests: XCTestCase {
       "Check your internet connection and try again."
     )
   }
+
+  func testAuthenticatedViewerAcceptsASecureProfileImage() throws {
+    let viewer = try JSONDecoder().decode(
+      AuthenticatedViewer.self,
+      from: Data(
+        #"{"subject":"user","name":"Profile User","email":"user@example.test","image":"https://example.com/profile.png"}"#.utf8
+      )
+    )
+
+    XCTAssertEqual(viewer.imageURL?.absoluteString, "https://example.com/profile.png")
+  }
+
+  func testAuthenticatedViewerRejectsAnInsecureProfileImage() throws {
+    let viewer = try JSONDecoder().decode(
+      AuthenticatedViewer.self,
+      from: Data(
+        #"{"subject":"user","name":null,"email":null,"image":"http://example.com/profile.png"}"#.utf8
+      )
+    )
+
+    XCTAssertNil(viewer.imageURL)
+  }
 }

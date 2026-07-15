@@ -1,4 +1,4 @@
-import { createAuth } from "./betterAuth/auth";
+import { authComponent, createAuth } from "./betterAuth/auth";
 import { internalAction, query } from "./_generated/server";
 
 export const getLatestJwks = internalAction({
@@ -15,10 +15,14 @@ export const current = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
+    const user = await authComponent.safeGetAuthUser(ctx);
+    if (!user) return null;
+
     return {
       subject: identity.subject,
-      name: identity.name,
-      email: identity.email,
+      name: user.name,
+      email: user.email,
+      image: user.image,
     };
   },
 });

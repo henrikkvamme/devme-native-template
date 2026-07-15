@@ -39,6 +39,16 @@ struct AuthenticatedViewer: Codable, Equatable, Sendable {
   let subject: String
   let name: String?
   let email: String?
+  let image: String?
+
+  var imageURL: URL? {
+    guard
+      let image,
+      let url = URL(string: image),
+      url.scheme == "https"
+    else { return nil }
+    return url
+  }
 }
 
 enum StarterBackendError: LocalizedError {

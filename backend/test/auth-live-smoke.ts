@@ -49,9 +49,34 @@ if (typeof tokenBody.token !== "string") {
 
 const convex = new ConvexHttpClient(convexURL);
 convex.setAuth(tokenBody.token);
+const profileImage = "https://example.com/devme-auth-smoke-profile.png";
+const updateUserResponse = await fetch(`${authSiteURL}/api/auth/update-user`, {
+  method: "POST",
+  headers: {
+    authorization: `Bearer ${bearerToken}`,
+    "content-type": "application/json",
+  },
+  body: JSON.stringify({ image: profileImage }),
+});
+await expectStatus(updateUserResponse, 200);
+
+const currentSessionResponse = await fetch(`${authSiteURL}/api/auth/get-session`, {
+  headers: { authorization: `Bearer ${bearerToken}` },
+});
+await expectStatus(currentSessionResponse, 200);
+const currentSession = (await currentSessionResponse.json()) as {
+  user?: { email?: string; image?: string | null };
+};
+if (
+  currentSession.user?.email !== credentials.email ||
+  currentSession.user.image !== profileImage
+) {
+  throw new Error("Better Auth did not persist the authenticated profile image");
+}
+
 const viewer = await convex.query(api.auth.current, {});
-if (viewer?.email !== credentials.email) {
-  throw new Error("Convex did not resolve the authenticated Better Auth user");
+if (viewer?.email !== credentials.email || viewer.image !== profileImage) {
+  throw new Error("Convex did not resolve the authenticated Better Auth profile");
 }
 
 const subscriptionsResponse = await fetch(`${authSiteURL}/api/auth/subscription/list`, {
@@ -73,6 +98,7 @@ console.log(
   JSON.stringify({
     auth: "passed",
     convexIdentity: "passed",
+    profileImage: "passed",
     stripeSubscriptions: "passed",
     stripeWebhookSignatureGuard: "passed",
   }),

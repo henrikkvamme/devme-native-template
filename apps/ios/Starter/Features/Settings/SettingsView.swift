@@ -156,11 +156,7 @@ struct SettingsView: View {
   private func signedInProfileCard(_ viewer: AuthenticatedViewer) -> some View {
     accountCard {
       HStack(spacing: 14) {
-        avatar(
-          text: initials(for: viewer),
-          foreground: .white,
-          background: Color.accentColor
-        )
+        profileAvatar(for: viewer)
 
         VStack(alignment: .leading, spacing: 4) {
           Text(viewer.name ?? "Authenticated user")
@@ -351,12 +347,43 @@ struct SettingsView: View {
       .background(.quaternary, in: Circle())
   }
 
-  private func avatar(text: String, foreground: Color, background: Color) -> some View {
-    Text(text)
-      .font(.headline)
-      .foregroundStyle(foreground)
+  @ViewBuilder
+  private func profileAvatar(for viewer: AuthenticatedViewer) -> some View {
+    if let imageURL = viewer.imageURL {
+      AsyncImage(
+        url: imageURL,
+        transaction: Transaction(animation: .easeInOut(duration: 0.2))
+      ) { phase in
+        switch phase {
+        case let .success(image):
+          image
+            .resizable()
+            .scaledToFill()
+        case .empty, .failure:
+          initialsAvatar(for: viewer)
+        @unknown default:
+          initialsAvatar(for: viewer)
+        }
+      }
       .frame(width: 52, height: 52)
-      .background(background, in: Circle())
+      .clipShape(Circle())
+      .overlay {
+        Circle()
+          .strokeBorder(.primary.opacity(0.08))
+      }
+      .accessibilityLabel("Profile photo")
+    } else {
+      initialsAvatar(for: viewer)
+    }
+  }
+
+  private func initialsAvatar(for viewer: AuthenticatedViewer) -> some View {
+    Text(initials(for: viewer))
+      .font(.headline)
+      .foregroundStyle(.white)
+      .frame(width: 52, height: 52)
+      .background(Color.accentColor, in: Circle())
+      .accessibilityLabel("Profile initials")
   }
 
   private func initials(for viewer: AuthenticatedViewer) -> String {
