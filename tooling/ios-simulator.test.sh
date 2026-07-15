@@ -5,6 +5,13 @@ readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly temp="$(mktemp -d)"
 trap 'rm -rf "$temp"' EXIT
 
+cat >"$temp/auth.env" <<'EOF'
+GOOGLE_WEB_CLIENT_ID=123-web.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=123-ios.apps.googleusercontent.com
+EOF
+export AUTH_CONFIG_FILE="$temp/auth.env"
+export IOS_AUTH_XCCONFIG="$temp/Auth.local.xcconfig"
+
 cat >"$temp/xcrun" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail

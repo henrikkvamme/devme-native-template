@@ -25,6 +25,7 @@ struct RootTabView: View {
     }
     .task { await viewModel.start() }
     .onOpenURL { url in
+      if NativeIdentityClient.handleGoogleRedirect(url) { return }
       Task { await viewModel.handleBillingCallback(url) }
     }
   }

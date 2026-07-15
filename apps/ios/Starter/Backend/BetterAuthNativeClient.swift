@@ -50,6 +50,24 @@ protocol BetterAuthSignInMethod: Sendable {
   func signOut() async throws
 }
 
+actor NativeCredentialSignInMethod: BetterAuthSignInMethod {
+  private var pendingCredential: NativeIdentityCredential?
+
+  func prepare(_ credential: NativeIdentityCredential) {
+    pendingCredential = credential
+  }
+
+  func signIn(using authClient: BetterAuthNativeClient) async throws -> BetterAuthSession {
+    guard let credential = pendingCredential else {
+      throw BetterAuthNativeError.missingNativeCredential
+    }
+    pendingCredential = nil
+    return try await authClient.signIn(with: credential)
+  }
+
+  func signOut() async throws {}
+}
+
 struct NativeIdentitySignInMethod: BetterAuthSignInMethod {
   let nativeIdentity: any NativeIdentityProvider
 
@@ -87,6 +105,7 @@ struct UnavailableBetterAuthSignInMethod: BetterAuthSignInMethod {
 enum BetterAuthNativeError: LocalizedError {
   case invalidResponse
   case missingBearerToken
+  case missingNativeCredential
   case noCachedSession
   case providerNotConfigured
   case requestFailed(status: Int, message: String)
@@ -97,6 +116,8 @@ enum BetterAuthNativeError: LocalizedError {
       "The authentication server returned an invalid response."
     case .missingBearerToken:
       "The authentication server did not create a bearer session."
+    case .missingNativeCredential:
+      "Choose Apple or Google before starting authentication."
     case .noCachedSession:
       "No cached authentication session is available."
     case .providerNotConfigured:

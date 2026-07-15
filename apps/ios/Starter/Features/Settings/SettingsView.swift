@@ -1,9 +1,12 @@
+import AuthenticationServices
 import SwiftUI
 
 struct SettingsView: View {
+  @Environment(\.colorScheme) private var colorScheme
   @Environment(\.openURL) private var openURL
   @ObservedObject var viewModel: HomeViewModel
   @State private var isConfirmingSignOut = false
+  @State private var appleNonce: IdentityNonce?
 
   var body: some View {
     ScrollView {
@@ -21,11 +24,7 @@ struct SettingsView: View {
     }
     .background(Color(.systemGroupedBackground))
     .navigationTitle("Settings")
-    .confirmationDialog(
-      "Sign out of this device?",
-      isPresented: $isConfirmingSignOut,
-      titleVisibility: .visible
-    ) {
+    .alert("Sign out?", isPresented: $isConfirmingSignOut) {
       Button("Sign out", role: .destructive) {
         Task { await viewModel.signOut() }
       }
@@ -54,117 +53,159 @@ struct SettingsView: View {
       }
     case .signedOut:
       accountCard {
-        VStack(alignment: .leading, spacing: 20) {
-          HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: 18) {
+          HStack(spacing: 14) {
             avatar(systemImage: "person.fill", tint: .secondary)
             VStack(alignment: .leading, spacing: 4) {
               Text("Your account")
-                .font(.title3.bold())
+                .font(.headline)
               Text("Sign in to keep your data and subscription connected.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             }
           }
 
-          Button {
-            Task { await viewModel.signIn() }
-          } label: {
-            Label("Sign in demo user", systemImage: "person.badge.key.fill")
-              .frame(maxWidth: .infinity)
+          signInControls
+
+          if let message = viewModel.authenticationErrorMessage {
+            authenticationError(message)
           }
-          .buttonStyle(.borderedProminent)
-          .controlSize(.large)
-          .disabled(viewModel.isAuthenticating)
         }
       }
     case let .signedIn(viewer):
       signedInProfileCard(viewer)
-    case let .failed(message):
-      accountCard {
-        VStack(alignment: .leading, spacing: 18) {
-          HStack(spacing: 16) {
-            avatar(systemImage: "exclamationmark", tint: .orange)
-            VStack(alignment: .leading, spacing: 4) {
-              Text("Could not load your account")
-                .font(.headline)
-              Text(message)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .lineLimit(3)
-            }
-          }
+    }
+  }
 
-          Button("Try again") {
-            Task { await viewModel.signIn() }
-          }
-          .buttonStyle(.bordered)
-          .disabled(viewModel.isAuthenticating)
+  @ViewBuilder
+  private var signInControls: some View {
+    switch viewModel.authenticationMode {
+    case .developmentDemo:
+      Button {
+        Task { await viewModel.signIn() }
+      } label: {
+        Label("Sign in demo user", systemImage: "person.badge.key.fill")
+          .frame(maxWidth: .infinity)
+      }
+      .buttonStyle(.borderedProminent)
+      .controlSize(.large)
+      .disabled(viewModel.isAuthenticating)
+
+    case .native:
+      VStack(spacing: 12) {
+        SignInWithAppleButton(.signIn) { request in
+          configureAppleRequest(request)
+        } onCompletion: { result in
+          completeAppleSignIn(result)
+        }
+        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
+        .frame(height: 52)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .disabled(viewModel.isAuthenticating)
+
+        GoogleSignInBrandButton(isAuthenticating: viewModel.isAuthenticating) {
+          Task { await signInWithGoogle() }
         }
       }
     }
   }
 
-  private func signedInProfileCard(_ viewer: AuthenticatedViewer) -> some View {
-    VStack(alignment: .leading, spacing: 0) {
-      ZStack {
-        LinearGradient(
-          colors: [Color.accentColor.opacity(0.92), Color.indigo.opacity(0.82)],
-          startPoint: .topLeading,
-          endPoint: .bottomTrailing
-        )
+  private func configureAppleRequest(_ request: ASAuthorizationAppleIDRequest) {
+    do {
+      let nonce = try IdentityNonce.generate()
+      appleNonce = nonce
+      request.requestedScopes = [.fullName, .email]
+      request.nonce = nonce.hashedValue
+    } catch {
+      viewModel.reportAuthenticationError(error, provider: .apple)
+    }
+  }
 
-        Circle()
-          .fill(.white.opacity(0.12))
-          .frame(width: 150, height: 150)
-          .offset(x: 220, y: 68)
+  private func completeAppleSignIn(_ result: Result<ASAuthorization, Error>) {
+    defer { appleNonce = nil }
+    do {
+      let authorization = try result.get()
+      guard
+        let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+        let appleNonce
+      else {
+        throw NativeIdentityError.missingAppleIdentityToken
       }
-      .frame(height: 104)
-      .clipped()
-      .overlay(alignment: .bottomLeading) {
+      let nativeCredential = try NativeIdentityClient.appleCredential(
+        from: credential,
+        nonce: appleNonce
+      )
+      Task { await viewModel.signIn(with: nativeCredential) }
+    } catch {
+      guard !NativeIdentityClient.isCancellation(error) else { return }
+      viewModel.reportAuthenticationError(error, provider: .apple)
+    }
+  }
+
+  @MainActor
+  private func signInWithGoogle() async {
+    do {
+      let credential = try await NativeIdentityClient.signInWithGoogle()
+      await viewModel.signIn(with: credential)
+    } catch {
+      guard !NativeIdentityClient.isCancellation(error) else { return }
+      viewModel.reportAuthenticationError(error, provider: .google)
+    }
+  }
+
+  private func signedInProfileCard(_ viewer: AuthenticatedViewer) -> some View {
+    accountCard {
+      HStack(spacing: 14) {
         avatar(
           text: initials(for: viewer),
-          foreground: Color.accentColor,
-          background: .white
+          foreground: .white,
+          background: Color.accentColor
         )
-        .offset(y: 34)
-        .padding(.leading, 22)
-      }
 
-      VStack(alignment: .leading, spacing: 10) {
-        HStack(alignment: .firstTextBaseline, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
           Text(viewer.name ?? "Authenticated user")
-            .font(.title2.bold())
+            .font(.headline)
             .lineLimit(1)
 
-          Image(systemName: "checkmark.shield.fill")
-            .foregroundStyle(Color.accentColor)
-            .accessibilityLabel("Authenticated account")
-        }
+          if let email = viewer.email {
+            Text(email)
+              .font(.subheadline)
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .textSelection(.enabled)
+          }
 
-        if let email = viewer.email {
-          Text(email)
-            .font(.subheadline)
+          Label("Signed in securely", systemImage: "checkmark.shield.fill")
+            .font(.caption)
             .foregroundStyle(.secondary)
-            .textSelection(.enabled)
         }
+      }
+    }
+    .accessibilityElement(children: .contain)
+  }
 
-        Label("Signed in securely", systemImage: "lock.shield.fill")
+  private func authenticationError(_ message: String) -> some View {
+    HStack(alignment: .top, spacing: 10) {
+      Image(systemName: "exclamationmark.circle.fill")
+        .foregroundStyle(.orange)
+      Text(message)
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+      Button {
+        viewModel.dismissAuthenticationError()
+      } label: {
+        Image(systemName: "xmark")
           .font(.caption.weight(.semibold))
           .foregroundStyle(.secondary)
-          .padding(.top, 4)
+          .frame(width: 28, height: 28)
+          .contentShape(Rectangle())
       }
-      .padding(.horizontal, 22)
-      .padding(.top, 48)
-      .padding(.bottom, 22)
+      .buttonStyle(.plain)
+      .accessibilityLabel("Dismiss sign-in error")
     }
-    .background(Color(.secondarySystemGroupedBackground))
-    .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-    .overlay {
-      RoundedRectangle(cornerRadius: 26, style: .continuous)
-        .strokeBorder(.primary.opacity(0.06))
-    }
-    .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
-    .accessibilityElement(children: .contain)
+    .padding(12)
+    .background(.orange.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
   }
 
   private var subscriptionSection: some View {
@@ -259,11 +300,11 @@ struct SettingsView: View {
   ) -> some View {
     content()
       .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(22)
+      .padding(18)
       .background(Color(.secondarySystemGroupedBackground))
-      .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
+      .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
       .overlay {
-        RoundedRectangle(cornerRadius: 26, style: .continuous)
+        RoundedRectangle(cornerRadius: 18, style: .continuous)
           .strokeBorder(.primary.opacity(0.06))
       }
   }
@@ -306,20 +347,16 @@ struct SettingsView: View {
     Image(systemName: systemImage)
       .font(.title2.weight(.semibold))
       .foregroundStyle(tint)
-      .frame(width: 58, height: 58)
+      .frame(width: 52, height: 52)
       .background(.quaternary, in: Circle())
   }
 
   private func avatar(text: String, foreground: Color, background: Color) -> some View {
     Text(text)
-      .font(.title2.bold())
+      .font(.headline)
       .foregroundStyle(foreground)
-      .frame(width: 68, height: 68)
+      .frame(width: 52, height: 52)
       .background(background, in: Circle())
-      .overlay {
-        Circle().strokeBorder(.white.opacity(0.7), lineWidth: 3)
-      }
-      .shadow(color: .black.opacity(0.16), radius: 8, y: 4)
   }
 
   private func initials(for viewer: AuthenticatedViewer) -> String {

@@ -13,7 +13,6 @@ final class HomeViewModel: ObservableObject {
     case loading
     case signedOut
     case signedIn(AuthenticatedViewer)
-    case failed(String)
   }
 
   enum BillingState: Equatable {
@@ -29,6 +28,7 @@ final class HomeViewModel: ObservableObject {
   @Published private(set) var isSendingPing = false
   @Published private(set) var authenticationState: AuthenticationState = .loading
   @Published private(set) var isAuthenticating = false
+  @Published private(set) var authenticationErrorMessage: String?
   @Published private(set) var billingState: BillingState = .unavailable
   @Published private(set) var isStartingCheckout = false
 
@@ -37,6 +37,10 @@ final class HomeViewModel: ObservableObject {
 
   init(backend: StarterBackend) {
     self.backend = backend
+  }
+
+  var authenticationMode: StarterAuthenticationMode {
+    backend.authenticationMode
   }
 
   func start() async {
@@ -64,7 +68,8 @@ final class HomeViewModel: ObservableObject {
         authenticationState = .signedOut
       }
     } catch {
-      authenticationState = .failed(error.localizedDescription)
+      authenticationState = .signedOut
+      authenticationErrorMessage = "Your saved session could not be restored. Please sign in again."
     }
   }
 
@@ -80,18 +85,42 @@ final class HomeViewModel: ObservableObject {
     }
   }
 
-  func signIn() async {
+  func signIn(with credential: NativeIdentityCredential? = nil) async {
     guard !isAuthenticating else { return }
     isAuthenticating = true
-    authenticationState = .loading
+    authenticationErrorMessage = nil
     defer { isAuthenticating = false }
 
     do {
-      authenticationState = .signedIn(try await backend.signIn())
+      authenticationState = .signedIn(try await backend.signIn(with: credential))
       await refreshBilling()
     } catch {
-      authenticationState = .failed(error.localizedDescription)
+      authenticationState = .signedOut
+      authenticationErrorMessage = AuthenticationErrorPresentation.message(
+        for: error,
+        provider: credential?.provider
+      )
     }
+  }
+
+  func reportAuthenticationError(
+    _ error: Error,
+    provider: NativeSocialProvider? = nil
+  ) {
+    authenticationState = .signedOut
+    authenticationErrorMessage = AuthenticationErrorPresentation.message(
+      for: error,
+      provider: provider
+    )
+  }
+
+  func returnToSignIn() {
+    authenticationState = .signedOut
+    authenticationErrorMessage = nil
+  }
+
+  func dismissAuthenticationError() {
+    authenticationErrorMessage = nil
   }
 
   func signOut() async {
@@ -100,6 +129,7 @@ final class HomeViewModel: ObservableObject {
     defer { isAuthenticating = false }
     await backend.signOut()
     authenticationState = .signedOut
+    authenticationErrorMessage = nil
     billingState = .unavailable
   }
 

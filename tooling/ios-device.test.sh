@@ -15,6 +15,12 @@ trap cleanup EXIT
 
 mkdir -p "$fake_bin"
 : >"$command_log"
+cat >"$temporary_directory/auth.env" <<'EOF'
+GOOGLE_WEB_CLIENT_ID=123-web.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=123-ios.apps.googleusercontent.com
+EOF
+export AUTH_CONFIG_FILE="$temporary_directory/auth.env"
+export IOS_AUTH_XCCONFIG="$temporary_directory/Auth.local.xcconfig"
 
 cat >"$fake_bin/tailscale" <<'SCRIPT'
 #!/usr/bin/env bash

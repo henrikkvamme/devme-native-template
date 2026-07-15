@@ -12,6 +12,12 @@ readonly build_log="$root/.devme/ios-simulator-build-$slot.log"
 readonly xcrun_bin="${XCRUN_BIN:-xcrun}"
 readonly xcodebuild_bin="${XCODEBUILD_BIN:-xcodebuild}"
 readonly plist_buddy_bin="${PLIST_BUDDY_BIN:-/usr/libexec/PlistBuddy}"
+auth_xcconfig=""
+if ! auth_xcconfig="$($root/tooling/ios-auth-xcconfig.sh)"; then
+  printf '%s\n' "$auth_xcconfig"
+  exit 1
+fi
+readonly auth_xcconfig
 
 fail() {
   local message="$1"
@@ -63,6 +69,7 @@ if ! "$xcodebuild_bin" build \
   -destination "platform=iOS Simulator,id=$simulator_udid" \
   -derivedDataPath "$derived_data" \
   -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
+  -xcconfig "$auth_xcconfig" \
   CODE_SIGNING_ALLOWED=NO \
   CONVEX_URL="http://127.0.0.1:$convex_port" \
   AUTH_SITE_URL="http://127.0.0.1:$auth_site_port" >"$build_log" 2>&1; then

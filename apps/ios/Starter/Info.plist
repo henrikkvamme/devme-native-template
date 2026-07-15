@@ -20,6 +20,14 @@
   <array>
     <dict>
       <key>CFBundleURLName</key>
+      <string>google-sign-in</string>
+      <key>CFBundleURLSchemes</key>
+      <array>
+        <string>$(GOOGLE_REVERSED_CLIENT_ID)</string>
+      </array>
+    </dict>
+    <dict>
+      <key>CFBundleURLName</key>
       <string>dev.starter.app.billing</string>
       <key>CFBundleURLSchemes</key>
       <array>
@@ -33,6 +41,10 @@
   <string>$(CONVEX_URL)</string>
   <key>AUTH_SITE_URL</key>
   <string>$(AUTH_SITE_URL)</string>
+  <key>GIDClientID</key>
+  <string>$(GOOGLE_IOS_CLIENT_ID)</string>
+  <key>GIDServerClientID</key>
+  <string>$(GOOGLE_SERVER_CLIENT_ID)</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>NSAppTransportSecurity</key>

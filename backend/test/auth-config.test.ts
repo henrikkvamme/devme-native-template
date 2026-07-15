@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   externalConfigurationReady,
   groupReadiness,
+  iosXCConfig,
   prepareConfiguration,
   serializeConfiguration,
 } from "../../tooling/auth-config";
@@ -36,6 +37,22 @@ describe("auth configuration", () => {
     await expect(
       prepareConfiguration("GOOGLE_IOS_CLIENT_ID=ios.apps.googleusercontent.com", "/workspace"),
     ).rejects.toThrow("google is missing");
+  });
+
+  it("generates local iOS build settings from Google OAuth clients", () => {
+    expect(
+      iosXCConfig({
+        GOOGLE_WEB_CLIENT_ID: "123-web.apps.googleusercontent.com",
+        GOOGLE_IOS_CLIENT_ID: "123-ios.apps.googleusercontent.com",
+      }),
+    ).toBe(
+      [
+        "GOOGLE_IOS_CLIENT_ID = 123-ios.apps.googleusercontent.com",
+        "GOOGLE_SERVER_CLIENT_ID = 123-web.apps.googleusercontent.com",
+        "GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.123-ios",
+        "",
+      ].join("\n"),
+    );
   });
 
   it("accepts a complete Stripe group without requiring unrelated providers", async () => {
@@ -96,7 +113,7 @@ describe("auth configuration", () => {
       {
         name: "google",
         status: "missing",
-        missing: ["GOOGLE_IOS_CLIENT_ID", "GOOGLE_ANDROID_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+        missing: ["GOOGLE_WEB_CLIENT_ID", "GOOGLE_IOS_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
       },
       {
         name: "apple",

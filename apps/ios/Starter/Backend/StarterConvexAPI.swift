@@ -5,11 +5,34 @@ import Foundation
 struct BootstrapEvent: Codable, Equatable, Identifiable, Sendable {
   let _creationTime: Double
   let _id: String
+  let authenticated: Bool?
   let client: String
   let message: String
 
   var id: String { _id }
   var clientName: String { client == "ios" ? "iOS" : client.capitalized }
+
+  var authenticationLabel: String {
+    switch authenticated {
+    case true?:
+      "Authenticated"
+    case false?:
+      "Not authenticated"
+    case nil:
+      "Authentication unknown"
+    }
+  }
+
+  var authenticationSymbol: String {
+    switch authenticated {
+    case true?:
+      "checkmark.shield.fill"
+    case false?:
+      "person.crop.circle.badge.xmark"
+    case nil:
+      "questionmark.circle"
+    }
+  }
 }
 
 struct AuthenticatedViewer: Codable, Equatable, Sendable {
@@ -32,12 +55,18 @@ enum StarterBackendError: LocalizedError {
   }
 }
 
+enum StarterAuthenticationMode: Equatable, Sendable {
+  case native
+  case developmentDemo
+}
+
 @MainActor
 protocol StarterBackend {
+  var authenticationMode: StarterAuthenticationMode { get }
   func bootstrapEvents() -> AnyPublisher<[BootstrapEvent], Error>
   func ping() async throws
   func restoreSession() async throws -> AuthenticatedViewer?
-  func signIn() async throws -> AuthenticatedViewer
+  func signIn(with credential: NativeIdentityCredential?) async throws -> AuthenticatedViewer
   func signOut() async
   func subscriptions() async throws -> [BetterAuthSubscription]
   func subscriptionCheckoutURL() async throws -> URL
@@ -53,9 +82,18 @@ final class LiveStarterConvexAPI: StarterBackend {
 
   private let client: ConvexClientWithAuth<BetterAuthSession>
   private let authProvider: BetterAuthProvider
+  private let nativeSignInMethod: NativeCredentialSignInMethod?
+  let authenticationMode: StarterAuthenticationMode
 
-  init(deploymentURL: URL, authProvider: BetterAuthProvider) {
+  init(
+    deploymentURL: URL,
+    authProvider: BetterAuthProvider,
+    authenticationMode: StarterAuthenticationMode,
+    nativeSignInMethod: NativeCredentialSignInMethod? = nil
+  ) {
     self.authProvider = authProvider
+    self.authenticationMode = authenticationMode
+    self.nativeSignInMethod = nativeSignInMethod
     client = ConvexClientWithAuth(
       deploymentUrl: deploymentURL.absoluteString,
       authProvider: authProvider
@@ -85,7 +123,13 @@ final class LiveStarterConvexAPI: StarterBackend {
     }
   }
 
-  func signIn() async throws -> AuthenticatedViewer {
+  func signIn(with credential: NativeIdentityCredential?) async throws -> AuthenticatedViewer {
+    if let credential {
+      guard let nativeSignInMethod else {
+        throw BetterAuthNativeError.providerNotConfigured
+      }
+      await nativeSignInMethod.prepare(credential)
+    }
     switch await client.login() {
     case .success:
       return try await currentViewer()
@@ -96,6 +140,7 @@ final class LiveStarterConvexAPI: StarterBackend {
 
   func signOut() async {
     await client.logout()
+    NativeIdentityClient.signOutFromGoogle()
   }
 
   func subscriptions() async throws -> [BetterAuthSubscription] {

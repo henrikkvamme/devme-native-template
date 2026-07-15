@@ -20,7 +20,7 @@ const groups = {
       "GOOGLE_ANDROID_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
     ],
-    required: ["GOOGLE_IOS_CLIENT_ID", "GOOGLE_ANDROID_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
+    required: ["GOOGLE_WEB_CLIENT_ID", "GOOGLE_IOS_CLIENT_ID", "GOOGLE_CLIENT_SECRET"],
   },
   apple: {
     accepted: [
@@ -154,6 +154,25 @@ export const serializeConfiguration = (configuration: Configuration) =>
     .map(([key, value]) => `${key}=${JSON.stringify(value)}`)
     .join("\n") + "\n";
 
+export const iosXCConfig = (configuration: Configuration) => {
+  const iosClientId = configuration.GOOGLE_IOS_CLIENT_ID?.trim();
+  const serverClientId = configuration.GOOGLE_WEB_CLIENT_ID?.trim();
+  if (!iosClientId || !serverClientId) {
+    throw new Error("iOS auth requires GOOGLE_IOS_CLIENT_ID and GOOGLE_WEB_CLIENT_ID");
+  }
+  const suffix = ".apps.googleusercontent.com";
+  if (!iosClientId.endsWith(suffix)) {
+    throw new Error("GOOGLE_IOS_CLIENT_ID must end with .apps.googleusercontent.com");
+  }
+  const clientPrefix = iosClientId.slice(0, -suffix.length);
+  return [
+    `GOOGLE_IOS_CLIENT_ID = ${iosClientId}`,
+    `GOOGLE_SERVER_CLIENT_ID = ${serverClientId}`,
+    `GOOGLE_REVERSED_CLIENT_ID = com.googleusercontent.apps.${clientPrefix}`,
+    "",
+  ].join("\n");
+};
+
 const toonString = (value: string) => JSON.stringify(value);
 
 const printUsageError = (message: string) => {
@@ -175,10 +194,20 @@ const parseFlag = (arguments_: string[], name: string) => {
 const printHelp = () => {
   console.log("bin: tooling/auth-config.ts");
   console.log('description: "Validate and inspect native auth and billing configuration"');
-  console.log("commands[3]{name,flags}:");
+  console.log("commands[4]{name,flags}:");
   console.log('  prepare,"--input <path> --output <path>"');
   console.log('  applied,"--input <path>"');
+  console.log('  ios-xcconfig,"--input <path> --output <path>"');
   console.log('  doctor,"--strict"');
+};
+
+const runIOSXCConfig = async (arguments_: string[]) => {
+  const input = parseFlag(arguments_, "--input");
+  const output = parseFlag(arguments_, "--output");
+  if (arguments_.length > 0) throw new Error(`Unknown argument: ${arguments_[0]}`);
+  if (!input || !output) throw new Error("ios-xcconfig requires --input and --output");
+  const configuration = parse(await Bun.file(input).text());
+  await Bun.write(output, iosXCConfig(configuration));
 };
 
 const runPrepare = async (arguments_: string[]) => {
@@ -265,6 +294,7 @@ const main = async () => {
   if (command === "--help" || command === "help") return printHelp();
   if (command === "prepare") return runPrepare(arguments_);
   if (command === "applied") return runApplied(arguments_);
+  if (command === "ios-xcconfig") return runIOSXCConfig(arguments_);
   if (command === "doctor") return runDoctor(arguments_);
   throw new Error(command ? `Unknown command: ${command}` : "A command is required");
 };

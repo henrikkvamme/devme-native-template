@@ -65,6 +65,12 @@
               },
               "optional": false
             },
+            "authenticated": {
+              "fieldType": {
+                "type": "boolean"
+              },
+              "optional": true
+            },
             "client": {
               "fieldType": {
                 "type": "union",

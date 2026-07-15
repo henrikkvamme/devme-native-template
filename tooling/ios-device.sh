@@ -16,6 +16,12 @@ readonly xcodebuild_bin="${XCODEBUILD_BIN:-xcodebuild}"
 readonly defaults_bin="${DEFAULTS_BIN:-defaults}"
 readonly plist_buddy_bin="${PLIST_BUDDY_BIN:-/usr/libexec/PlistBuddy}"
 readonly bun_bin="${BUN_BIN:-bun}"
+auth_xcconfig=""
+if ! auth_xcconfig="$($root/tooling/ios-auth-xcconfig.sh)"; then
+  printf '%s\n' "$auth_xcconfig"
+  exit 1
+fi
+readonly auth_xcconfig
 
 mkdir -p "$root/.devme"
 
@@ -97,6 +103,7 @@ build_app() {
     -destination "platform=iOS,id=$device_id" \
     -derivedDataPath "$derived_data" \
     -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
+    -xcconfig "$auth_xcconfig" \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
     DEVELOPMENT_TEAM="$development_team" \
@@ -202,6 +209,7 @@ run_e2e() {
     -destination-timeout 30 \
     -derivedDataPath "$derived_data" \
     -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
+    -xcconfig "$auth_xcconfig" \
     -resultBundlePath "$result_bundle" \
     -only-testing:StarterUITests \
     -allowProvisioningUpdates \

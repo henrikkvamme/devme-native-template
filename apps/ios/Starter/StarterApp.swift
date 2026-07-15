@@ -8,14 +8,27 @@ struct StarterApp: App {
     let authClient = BetterAuthNativeClient(siteURL: AppConfiguration.authSiteURL)
     let tokenStore = KeychainBearerTokenStore(service: "dev.starter.app.better-auth")
 #if DEBUG
-    let signInMethod: any BetterAuthSignInMethod = DevelopmentEmailSignInMethod(
-      email: "native-starter-demo@example.test",
-      password: "Local-only-native-demo-2026!",
-      name: "Native Starter Developer"
-    )
+    if ProcessInfo.processInfo.environment["STARTER_AUTH_MODE"] == "demo" {
+      let signInMethod = DevelopmentEmailSignInMethod(
+        email: "native-starter-demo@example.test",
+        password: "Local-only-native-demo-2026!",
+        name: "Native Starter Developer"
+      )
+      let authProvider = BetterAuthProvider(
+        signInMethod: signInMethod,
+        authClient: authClient,
+        tokenStore: tokenStore
+      )
+      backend = LiveStarterConvexAPI(
+        deploymentURL: AppConfiguration.convexURL,
+        authProvider: authProvider,
+        authenticationMode: .developmentDemo
+      )
+      return
+    }
 #else
-    let signInMethod: any BetterAuthSignInMethod = UnavailableBetterAuthSignInMethod()
 #endif
+    let signInMethod = NativeCredentialSignInMethod()
     let authProvider = BetterAuthProvider(
       signInMethod: signInMethod,
       authClient: authClient,
@@ -23,7 +36,9 @@ struct StarterApp: App {
     )
     backend = LiveStarterConvexAPI(
       deploymentURL: AppConfiguration.convexURL,
-      authProvider: authProvider
+      authProvider: authProvider,
+      authenticationMode: .native,
+      nativeSignInMethod: signInMethod
     )
   }
 

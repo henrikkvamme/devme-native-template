@@ -153,6 +153,14 @@ private fun HomeScreen(
               event.client.replaceFirstChar(Char::uppercase),
               color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Text(
+              when (event.authenticated) {
+                true -> "Authenticated"
+                false -> "Not authenticated"
+                null -> "Authentication unknown"
+              },
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
           }
         }
       }
