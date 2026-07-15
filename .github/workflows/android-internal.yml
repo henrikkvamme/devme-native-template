@@ -19,6 +19,8 @@ jobs:
     timeout-minutes: 30
     environment: google-play-internal
     env:
+      ANDROID_HOME: ${{ github.workspace }}/.devme/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/.devme/android-sdk
       ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
       ANDROID_VERSION_NAME: ${{ vars.ANDROID_VERSION_NAME }}
       ORG_GRADLE_PROJECT_releaseConvexUrl: ${{ vars.ANDROID_CONVEX_URL }}
@@ -89,11 +91,7 @@ jobs:
           cache: gradle
 
       - name: Install Android SDK packages
-        run: |
-          set +o pipefail
-          yes | sdkmanager --licenses >/dev/null
-          set -o pipefail
-          sdkmanager "build-tools;36.0.0" "platforms;android-37.0"
+        run: bash tooling/android-sdk.sh
 
       - name: Test and lint tagged source
         working-directory: apps/android
