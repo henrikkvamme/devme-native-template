@@ -30,7 +30,7 @@ timeout = 180
 [task.test]
 kind = "check"
 description = "Run backend unit and contract tests"
-cmd = "vp test backend"
+cmd = "bun run test backend"
 cwd = ".."
 steps = ["root::dependencies"]
 timeout = 180

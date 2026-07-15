@@ -52,7 +52,7 @@ timeout = 180
 [task.typescript-check]
 kind = "check"
 description = "Format-check, lint, and type-check TypeScript"
-cmd = "vp check"
+cmd = "bun run check"
 steps = ["dependencies"]
 timeout = 180
 
