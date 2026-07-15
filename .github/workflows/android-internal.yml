@@ -1,0 +1,180 @@
+name: Android Internal
+
+on:
+  push:
+    tags:
+      - android-beta-*
+
+permissions:
+  contents: read
+
+concurrency:
+  group: google-play-internal
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to Google Play internal testing
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: google-play-internal
+    env:
+      ANDROID_PACKAGE_NAME: ${{ vars.ANDROID_PACKAGE_NAME }}
+      ANDROID_VERSION_NAME: ${{ vars.ANDROID_VERSION_NAME }}
+      ORG_GRADLE_PROJECT_releaseConvexUrl: ${{ vars.ANDROID_CONVEX_URL }}
+      ORG_GRADLE_PROJECT_releaseAuthSiteUrl: ${{ vars.ANDROID_AUTH_SITE_URL }}
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate release source and public configuration
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            printf 'Release tags must point to a commit already on main.\n' >&2
+            exit 1
+          fi
+          missing=()
+          for name in \
+            ANDROID_PACKAGE_NAME \
+            ORG_GRADLE_PROJECT_releaseConvexUrl \
+            ORG_GRADLE_PROJECT_releaseAuthSiteUrl
+          do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing google-play-internal configuration: %s\n' "${missing[*]}" >&2
+            printf 'Follow docs/android-google-play.md before publishing a beta tag.\n' >&2
+            exit 1
+          fi
+          for url_name in ORG_GRADLE_PROJECT_releaseConvexUrl ORG_GRADLE_PROJECT_releaseAuthSiteUrl; do
+            if [[ "${!url_name}" != https://* || "${!url_name}" == *replace-before-release* ]]; then
+              printf '%s must be a production HTTPS URL.\n' "$url_name" >&2
+              exit 1
+            fi
+          done
+
+      - name: Derive Android version
+        id: version
+        run: |
+          tag="$GITHUB_REF_NAME"
+          if [[ ! "$tag" =~ ^android-beta-([0-9]{8})\.([0-9]{1,2})$ ]]; then
+            printf 'Tag must match android-beta-YYYYMMDD.N with N between 1 and 99.\n' >&2
+            exit 1
+          fi
+          release_date="${BASH_REMATCH[1]}"
+          sequence=$((10#${BASH_REMATCH[2]}))
+          normalized_date="$(date -d "${release_date:0:4}-${release_date:4:2}-${release_date:6:2}" +%Y%m%d 2>/dev/null || true)"
+          if [[ "$normalized_date" != "$release_date" || "$sequence" -lt 1 || "$sequence" -gt 99 ]]; then
+            printf 'Tag contains an invalid date or sequence.\n' >&2
+            exit 1
+          fi
+          version_code=$((10#$release_date * 100 + sequence))
+          if (( version_code > 2100000000 )); then
+            printf 'Derived versionCode exceeds the Google Play maximum.\n' >&2
+            exit 1
+          fi
+          version_name="${ANDROID_VERSION_NAME:-1.0}"
+          printf 'code=%s\nname=%s\n' "$version_code" "$version_name" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Install Android SDK packages
+        run: |
+          set +o pipefail
+          yes | sdkmanager --licenses >/dev/null
+          set -o pipefail
+          sdkmanager "build-tools;36.0.0" "platforms;android-37.0"
+
+      - name: Test and lint tagged source
+        working-directory: apps/android
+        run: ./gradlew testDebugUnitTest lintDebug --no-daemon
+
+      - name: Validate release secrets
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: |
+          missing=()
+          for name in \
+            ANDROID_UPLOAD_KEYSTORE_BASE64 \
+            ANDROID_UPLOAD_KEYSTORE_PASSWORD \
+            ANDROID_UPLOAD_KEY_ALIAS \
+            ANDROID_UPLOAD_KEY_PASSWORD \
+            GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64
+          do
+            if [[ -z "${!name:-}" ]]; then
+              missing+=("$name")
+            fi
+          done
+          if (( ${#missing[@]} > 0 )); then
+            printf 'Missing google-play-internal secrets: %s\n' "${missing[*]}" >&2
+            printf 'Follow docs/android-google-play.md before publishing a beta tag.\n' >&2
+            exit 1
+          fi
+
+      - name: Materialize upload key
+        env:
+          ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+        run: |
+          printf '%s' "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+          chmod 600 "$RUNNER_TEMP/upload.jks"
+          echo "ANDROID_UPLOAD_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
+
+      - name: Build signed app bundle
+        working-directory: apps/android
+        env:
+          ANDROID_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_versionCode: ${{ steps.version.outputs.code }}
+          ORG_GRADLE_PROJECT_versionName: ${{ steps.version.outputs.name }}
+        run: ./gradlew bundleRelease --no-daemon
+
+      - name: Remove upload key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
+
+      - name: Preserve release artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: android-${{ github.ref_name }}
+          path: |
+            apps/android/app/build/outputs/bundle/release/app-release.aab
+            apps/android/app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Materialize Play credentials
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64 }}
+        run: |
+          printf '%s' "$GOOGLE_PLAY_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode > "$RUNNER_TEMP/google-play.json"
+          chmod 600 "$RUNNER_TEMP/google-play.json"
+
+      - name: Publish internal release
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJson: ${{ runner.temp }}/google-play.json
+          packageName: ${{ env.ANDROID_PACKAGE_NAME }}
+          releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
+          mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
+          tracks: internal
+          status: completed
+          releaseName: ${{ github.ref_name }}
+
+      - name: Remove Play credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/google-play.json"

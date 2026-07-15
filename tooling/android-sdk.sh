@@ -3,9 +3,24 @@ set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly sdk_root="$root/.devme/android-sdk"
-readonly archive="$root/.devme/commandlinetools-mac-14742923_latest.zip"
-readonly archive_url="https://dl.google.com/android/repository/commandlinetools-mac-14742923_latest.zip"
-readonly archive_sha1="cc27cca4b84bfdbc7df17e3d0a01d0c640d8ee71"
+
+case "$(uname -s)" in
+  Darwin)
+    readonly platform="mac"
+    readonly archive_sha1="cc27cca4b84bfdbc7df17e3d0a01d0c640d8ee71"
+    ;;
+  Linux)
+    readonly platform="linux"
+    readonly archive_sha1="48833c34b761c10cb20bcd16582129395d121b27"
+    ;;
+  *)
+    printf 'Unsupported Android SDK host: %s\n' "$(uname -s)" >&2
+    exit 1
+    ;;
+esac
+
+readonly archive="$root/.devme/commandlinetools-$platform-14742923_latest.zip"
+readonly archive_url="https://dl.google.com/android/repository/commandlinetools-$platform-14742923_latest.zip"
 
 mkdir -p "$root/.devme" "$sdk_root/cmdline-tools"
 

@@ -56,9 +56,9 @@ cmd = "vp check"
 steps = ["dependencies"]
 timeout = 180
 
-[task.verify]
+[task.ci-core]
 kind = "check"
-description = "Run every deterministic repository check"
+description = "Run portable tooling and backend CI checks"
 depends_on = [
   "tooling-test",
   "typescript-check",
@@ -66,11 +66,12 @@ depends_on = [
   "backend::live-smoke",
   "backend::auth-live-smoke",
   "backend::contract-check",
-  "ios::test",
-  "ios::e2e",
-  "android::test",
-  "android::e2e",
 ]
+
+[task.verify]
+kind = "check"
+description = "Run every deterministic repository check"
+depends_on = ["ci-core", "ios::test", "ios::e2e", "android::test", "android::e2e"]
 
 [resource.ios-simulator]
 scope = "host"
