@@ -9,6 +9,7 @@ import kotlinx.serialization.Serializable
 data class BootstrapEvent(
   @SerialName("_creationTime") val creationTime: Double,
   @SerialName("_id") val id: String,
+  val authenticated: Boolean? = null,
   val client: String,
   val message: String,
 )

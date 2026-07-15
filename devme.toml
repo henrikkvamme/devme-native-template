@@ -12,7 +12,11 @@ android = "apps/android"
 [logs]
 redact = [
   "(?i)authorization: bearer [^[:space:]]+",
+  "(?i)set-auth-token: [^[:space:]]+",
+  "BETTER_AUTH_SECRET=[^[:space:]]+",
   "CONVEX_DEPLOY_KEY=[^[:space:]]+",
+  "(?i)STRIPE_(SECRET_KEY|WEBHOOK_SECRET)=[^[:space:]]+",
+  "whsec_[A-Za-z0-9_]+",
   "(?i)(development|production):[A-Za-z0-9_-]+\\|[A-Za-z0-9_-]+",
 ]
 retention_bytes = 16777216
@@ -33,34 +37,41 @@ check = "docker info >/dev/null 2>&1"
 provision = "printf 'Start Docker Desktop or OrbStack, then retry.\n' >&2; exit 1"
 trust = "manual"
 
+[step.stripe-cli]
+check = "command -v stripe >/dev/null"
+provision = "printf 'Install Stripe CLI from https://docs.stripe.com/stripe-cli/install, then retry.\n' >&2; exit 1"
+trust = "manual"
+
 [task.tooling-test]
 kind = "check"
 description = "Verify worktree ports and native device helpers"
-cmd = "bash tooling/devme-ports.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh"
+cmd = "bash -n tooling/stripe-webhooks.sh && devme config check && bash tooling/devme-ports.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh"
 steps = ["dependencies"]
 timeout = 180
 
 [task.typescript-check]
 kind = "check"
 description = "Format-check, lint, and type-check TypeScript"
-cmd = "vp check"
+cmd = "bun run check"
 steps = ["dependencies"]
 timeout = 180
 
-[task.verify]
+[task.ci-core]
 kind = "check"
-description = "Run every deterministic repository check"
+description = "Run portable tooling and backend CI checks"
 depends_on = [
   "tooling-test",
   "typescript-check",
   "backend::test",
   "backend::live-smoke",
+  "backend::auth-live-smoke",
   "backend::contract-check",
-  "ios::test",
-  "ios::e2e",
-  "android::test",
-  "android::e2e",
 ]
+
+[task.verify]
+kind = "check"
+description = "Run every deterministic repository check"
+depends_on = ["ci-core", "ios::test", "ios::e2e", "android::test", "android::e2e"]
 
 [resource.ios-simulator]
 scope = "host"

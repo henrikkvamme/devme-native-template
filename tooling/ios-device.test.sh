@@ -15,6 +15,12 @@ trap cleanup EXIT
 
 mkdir -p "$fake_bin"
 : >"$command_log"
+cat >"$temporary_directory/auth.env" <<'EOF'
+GOOGLE_WEB_CLIENT_ID=123-web.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=123-ios.apps.googleusercontent.com
+EOF
+export AUTH_CONFIG_FILE="$temporary_directory/auth.env"
+export IOS_AUTH_XCCONFIG="$temporary_directory/Auth.local.xcconfig"
 
 cat >"$fake_bin/tailscale" <<'SCRIPT'
 #!/usr/bin/env bash
@@ -23,30 +29,51 @@ set -euo pipefail
 if [[ "${1:-}" == "status" && "${2:-}" == "--json" ]]; then
   online="${TAILSCALE_PEER_ONLINE:-true}"
   self_online="${TAILSCALE_SELF_ONLINE:-true}"
-  printf '{"BackendState":"Running","Self":{"DNSName":"macbook.example.invalid.","Online":%s},"Peer":{"phone":{"DNSName":"iphone.example.invalid.","OS":"iOS","Online":%s}}}\n' "$self_online" "$online"
+  printf '{"BackendState":"Running","Self":{"DNSName":"macbook.example.ts.net.","Online":%s},"Peer":{"phone":{"DNSName":"iphone.example.ts.net.","OS":"iOS","Online":%s}}}\n' "$self_online" "$online"
   exit 0
 fi
 
 if [[ "${1:-}" == "serve" && "${2:-}" == "status" && "${3:-}" == "--json" ]]; then
-  if [[ -f "${SERVE_STATE:-/nonexistent}" ]]; then
-    target="$(cat "$SERVE_STATE")"
-    printf '{"TCP":{"8443":{"HTTPS":true}},"Web":{"macbook.example.invalid:8443":{"Handlers":{"/":{"Proxy":"%s"}}}}}\n' "$target"
-  else
-    printf '{}\n'
-  fi
+  state="${SERVE_STATE:-/nonexistent}"
+  first=true
+  printf '{"TCP":{'
+  for port in 8443 8444; do
+    if [[ -f "$state-$port" ]]; then
+      [[ "$first" == true ]] || printf ','
+      printf '"%s":{"HTTPS":true}' "$port"
+      first=false
+    fi
+  done
+  printf '},"Web":{'
+  first=true
+  for port in 8443 8444; do
+    if [[ -f "$state-$port" ]]; then
+      [[ "$first" == true ]] || printf ','
+      target="$(cat "$state-$port")"
+      printf '"macbook.example.ts.net:%s":{"Handlers":{"/":{"Proxy":"%s"}}}' "$port" "$target"
+      first=false
+    fi
+  done
+  printf '}}\n'
   exit 0
 fi
 
 if [[ "${1:-}" == "serve" && "$*" == *'--bg'* ]]; then
-  printf '%s\n' "${*: -1}" >"$SERVE_STATE"
+  for argument in "$@"; do
+    if [[ "$argument" == --https=* ]]; then port="${argument#--https=}"; fi
+  done
+  printf '%s\n' "${*: -1}" >"$SERVE_STATE-$port"
 fi
 
 if [[ "${1:-}" == "serve" && "${*: -1}" == "off" ]]; then
-  if [[ ! -f "$SERVE_STATE" ]]; then
+  for argument in "$@"; do
+    if [[ "$argument" == --https=* ]]; then port="${argument#--https=}"; fi
+  done
+  if [[ ! -f "$SERVE_STATE-$port" ]]; then
     printf 'handler does not exist\n' >&2
     exit 1
   fi
-  rm -f "$SERVE_STATE"
+  rm -f "$SERVE_STATE-$port"
 fi
 
 printf 'tailscale %s\n' "$*" >>"$COMMAND_LOG"
@@ -60,6 +87,12 @@ if [[ "${CURL_MODE:-success}" == "fail" ]]; then
   exit 7
 fi
 printf 'unknown'
+SCRIPT
+
+cat >"$fake_bin/convex-helper" <<'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'convex-helper %s\n' "$*" >>"$COMMAND_LOG"
 SCRIPT
 
 cat >"$fake_bin/bun" <<'SCRIPT'
@@ -156,36 +189,42 @@ assert_contains() {
 }
 
 device_url="$({
-  PATH="$fake_bin:$PATH" \
+PATH="$fake_bin:$PATH" \
     COMMAND_LOG="$command_log" \
     DEVME_SLOT=2 \
     "$root/tooling/tailscale-convex.sh" url
 })"
 
-if [[ "$device_url" != "https://macbook.example.invalid:8483" ]]; then
+if [[ "$device_url" != "https://macbook.example.ts.net:8483" ]]; then
   printf 'unexpected device URL: %s\n' "$device_url" >&2
   exit 1
 fi
 
-PATH="$fake_bin:$PATH" \
+  PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" ensure >/dev/null
 PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >/dev/null
 PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >"$temporary_directory/already-stopped.out"
 assert_contains "$temporary_directory/already-stopped.out" 'status: already-stopped'
 assert_contains "$command_log" 'tailscale serve --yes --bg --https=8443 http://127.0.0.1:3210'
+assert_contains "$command_log" 'tailscale serve --yes --bg --https=8444 http://127.0.0.1:3211'
+assert_contains "$command_log" 'convex-helper auth-host https://macbook.example.ts.net:8444'
 
-printf 'http://127.0.0.1:9999\n' >"$temporary_directory/serve-state"
+printf 'http://127.0.0.1:9999\n' >"$temporary_directory/serve-state-8443"
 mismatch_output="$temporary_directory/mismatch.out"
 if PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
+  CONVEX_HELPER_BIN="$fake_bin/convex-helper" \
   SERVE_STATE="$temporary_directory/serve-state" \
   "$root/tooling/tailscale-convex.sh" stop >"$mismatch_output"; then
   printf 'mismatched Tailscale target stop unexpectedly passed\n' >&2
@@ -208,7 +247,7 @@ if grep -Fq 'https://error:' "$url_failure_output"; then
 fi
 
 health_failure_output="$temporary_directory/health-failure.out"
-rm -f "$temporary_directory/serve-state"
+rm -f "$temporary_directory/serve-state-8443" "$temporary_directory/serve-state-8444"
 if PATH="$fake_bin:$PATH" \
   COMMAND_LOG="$command_log" \
   SERVE_STATE="$temporary_directory/serve-state" \
@@ -236,7 +275,8 @@ PATH="$fake_bin:$PATH" \
   DEVME_SLOT=2 \
   "$root/tooling/ios-device.sh" launch >"$temporary_directory/launch.out"
 
-assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.invalid:8483'
+assert_contains "$command_log" 'CONVEX_URL=https://macbook.example.ts.net:8483'
+assert_contains "$command_log" 'AUTH_SITE_URL=https://macbook.example.ts.net:8484'
 assert_contains "$command_log" 'DEVELOPMENT_TEAM=ABCDE12345'
 assert_contains "$command_log" 'platform=iOS,id=PHONE-1'
 assert_contains "$command_log" 'device install app --device PHONE-1'

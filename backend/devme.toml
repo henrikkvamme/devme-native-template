@@ -5,12 +5,17 @@ cmd = "DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh up"
 port = { base = 3210, slot_offset = 20 }
 url = "http://{host}:{port}"
 health = { http = "http://127.0.0.1:{port}/version" }
+readiness = { interval_ms = 1000, timeout_ms = 2000, retries = 180 }
 depends_on = ["root::docker"]
+
+[service.stripe-webhooks]
+cmd = "DEVME_SLOT={slot} bash ../tooling/stripe-webhooks.sh"
+depends_on = ["convex", "root::dependencies", "root::stripe-cli"]
 
 [task.codegen]
 kind = "utility"
 description = "Generate the Confect and Convex boundary code"
-cmd = "bunx confect codegen"
+cmd = "bun run codegen"
 steps = ["root::dependencies"]
 timeout = 120
 
@@ -25,7 +30,7 @@ timeout = 180
 [task.test]
 kind = "check"
 description = "Run backend unit and contract tests"
-cmd = "vp test backend"
+cmd = "bun run test backend"
 cwd = ".."
 steps = ["root::dependencies"]
 timeout = 180
@@ -35,6 +40,41 @@ kind = "check"
 description = "Deploy and exercise the backend through its public wire contract"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh live-smoke"
 depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.auth-live-smoke]
+kind = "check"
+description = "Verify Better Auth, Convex identity, and Stripe route integration"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-live-smoke"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.auth-doctor]
+kind = "utility"
+description = "Show auth, provider, billing, and official-doc readiness without revealing secrets"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor"
+depends_on = ["deploy"]
+steps = ["root::dependencies"]
+services = ["convex"]
+timeout = 180
+
+[task.billing-doctor]
+kind = "utility"
+description = "Compare the latest active Stripe sandbox subscription with Better Auth"
+cmd = "DEVME_SLOT={slot} bash ../tooling/stripe-webhooks.sh doctor"
+depends_on = ["deploy"]
+steps = ["root::dependencies", "root::stripe-cli"]
+services = ["convex"]
+timeout = 180
+
+[task.auth-configure]
+kind = "utility"
+description = "Validate .env.auth.local, apply it to local Convex, and redeploy"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-configure"
 steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
@@ -59,8 +99,8 @@ timeout = 180
 
 [task.launch]
 kind = "launch"
-description = "Start and deploy the local Convex backend"
+description = "Start Convex, deploy the backend, and forward Stripe webhooks"
 cmd = "true"
 depends_on = ["deploy"]
-services = ["convex"]
+services = ["convex", "stripe-webhooks"]
 timeout = 180

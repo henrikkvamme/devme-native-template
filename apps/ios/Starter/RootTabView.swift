@@ -1,50 +1,32 @@
 import SwiftUI
 
 struct RootTabView: View {
-  let backend: StarterBackend
+  @StateObject private var viewModel: HomeViewModel
+
+  init(backend: StarterBackend) {
+    _viewModel = StateObject(wrappedValue: HomeViewModel(backend: backend))
+  }
 
   var body: some View {
     TabView {
       NavigationStack {
-        HomeView(backend: backend)
+        HomeView(viewModel: viewModel)
       }
       .tabItem {
         Label("Home", systemImage: "house.fill")
       }
 
       NavigationStack {
-        PlaceholderView(
-          title: "Activity",
-          systemImage: "clock.arrow.circlepath"
-        )
-      }
-      .tabItem {
-        Label("Activity", systemImage: "clock.arrow.circlepath")
-      }
-
-      NavigationStack {
-        PlaceholderView(
-          title: "Settings",
-          systemImage: "gearshape.fill"
-        )
+        SettingsView(viewModel: viewModel)
       }
       .tabItem {
         Label("Settings", systemImage: "gearshape.fill")
       }
     }
-  }
-}
-
-private struct PlaceholderView: View {
-  let title: String
-  let systemImage: String
-
-  var body: some View {
-    ContentUnavailableView(
-      title,
-      systemImage: systemImage,
-      description: Text("Replace this tab with your native feature.")
-    )
-    .navigationTitle(title)
+    .task { await viewModel.start() }
+    .onOpenURL { url in
+      if NativeIdentityClient.handleGoogleRedirect(url) { return }
+      Task { await viewModel.handleBillingCallback(url) }
+    }
   }
 }

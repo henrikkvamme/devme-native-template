@@ -11,4 +11,15 @@ enum AppConfiguration {
 
     return url
   }
+
+  static var authSiteURL: URL {
+    guard
+      let rawValue = Bundle.main.object(forInfoDictionaryKey: "AUTH_SITE_URL") as? String,
+      let url = URL(string: rawValue)
+    else {
+      preconditionFailure("AUTH_SITE_URL must be a valid URL in Info.plist")
+    }
+
+    return url
+  }
 }

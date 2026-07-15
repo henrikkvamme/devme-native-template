@@ -18,6 +18,14 @@
 		100000000000000000000009 /* ConvexMobile in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000002 /* ConvexMobile */; };
 		10000000000000000000000A /* StarterUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000C /* StarterUITests.swift */; };
 		10000000000000000000000B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000E /* Assets.xcassets */; };
+		10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20000000000000000000000F /* BetterAuthNativeClient.swift */; };
+		10000000000000000000000D /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000010 /* SettingsView.swift */; };
+		10000000000000000000000E /* NativeIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000011 /* NativeIdentityTests.swift */; };
+		10000000000000000000000F /* IdentityNonce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000012 /* IdentityNonce.swift */; };
+		100000000000000000000010 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = A00000000000000000000004 /* GoogleSignIn */; };
+		100000000000000000000012 /* NativeIdentityClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000013 /* NativeIdentityClient.swift */; };
+		100000000000000000000013 /* AuthenticationErrorPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000015 /* AuthenticationErrorPresentation.swift */; };
+		100000000000000000000014 /* GoogleSignInBrandButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 200000000000000000000016 /* GoogleSignInBrandButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +60,14 @@
 		20000000000000000000000C /* StarterUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterUITests.swift; sourceTree = "<group>"; };
 		20000000000000000000000D /* StarterUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StarterUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		20000000000000000000000E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		20000000000000000000000F /* BetterAuthNativeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BetterAuthNativeClient.swift; sourceTree = "<group>"; };
+		200000000000000000000010 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		200000000000000000000011 /* NativeIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeIdentityTests.swift; sourceTree = "<group>"; };
+		200000000000000000000012 /* IdentityNonce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityNonce.swift; sourceTree = "<group>"; };
+		200000000000000000000013 /* NativeIdentityClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeIdentityClient.swift; sourceTree = "<group>"; };
+		200000000000000000000014 /* Starter.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Starter.entitlements; sourceTree = "<group>"; };
+		200000000000000000000015 /* AuthenticationErrorPresentation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationErrorPresentation.swift; sourceTree = "<group>"; };
+		200000000000000000000016 /* GoogleSignInBrandButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSignInBrandButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +76,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000009 /* ConvexMobile in Frameworks */,
+				100000000000000000000010 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +115,8 @@
 				200000000000000000000002 /* AppConfiguration.swift */,
 				200000000000000000000006 /* RootTabView.swift */,
 				20000000000000000000000E /* Assets.xcassets */,
+				200000000000000000000014 /* Starter.entitlements */,
+				50000000000000000000000B /* Authentication */,
 				500000000000000000000003 /* Backend */,
 				500000000000000000000004 /* Features */,
 				200000000000000000000009 /* Info.plist */,
@@ -109,14 +128,27 @@
 			isa = PBXGroup;
 			children = (
 				200000000000000000000003 /* StarterConvexAPI.swift */,
+				20000000000000000000000F /* BetterAuthNativeClient.swift */,
 			);
 			path = Backend;
+			sourceTree = "<group>";
+		};
+		50000000000000000000000B /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000015 /* AuthenticationErrorPresentation.swift */,
+				200000000000000000000016 /* GoogleSignInBrandButton.swift */,
+				200000000000000000000012 /* IdentityNonce.swift */,
+				200000000000000000000013 /* NativeIdentityClient.swift */,
+			);
+			path = Authentication;
 			sourceTree = "<group>";
 		};
 		500000000000000000000004 /* Features */ = {
 			isa = PBXGroup;
 			children = (
 				500000000000000000000005 /* Home */,
+				50000000000000000000000A /* Settings */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -130,10 +162,19 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		50000000000000000000000A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				200000000000000000000010 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		500000000000000000000006 /* StarterTests */ = {
 			isa = PBXGroup;
 			children = (
 				200000000000000000000007 /* BootstrapEventDecodingTests.swift */,
+				200000000000000000000011 /* NativeIdentityTests.swift */,
 			);
 			path = StarterTests;
 			sourceTree = "<group>";
@@ -182,6 +223,7 @@
 			name = Starter;
 			packageProductDependencies = (
 				A00000000000000000000002 /* ConvexMobile */,
+				A00000000000000000000004 /* GoogleSignIn */,
 			);
 			productName = Starter;
 			productReference = 20000000000000000000000A /* Starter.app */;
@@ -258,6 +300,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A00000000000000000000001 /* XCRemoteSwiftPackageReference "convex-swift" */,
+				A00000000000000000000003 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 500000000000000000000008 /* Products */;
@@ -308,6 +351,12 @@
 				100000000000000000000004 /* HomeViewModel.swift in Sources */,
 				100000000000000000000005 /* HomeView.swift in Sources */,
 				100000000000000000000006 /* RootTabView.swift in Sources */,
+				10000000000000000000000C /* BetterAuthNativeClient.swift in Sources */,
+				10000000000000000000000D /* SettingsView.swift in Sources */,
+				10000000000000000000000F /* IdentityNonce.swift in Sources */,
+				100000000000000000000012 /* NativeIdentityClient.swift in Sources */,
+				100000000000000000000013 /* AuthenticationErrorPresentation.swift in Sources */,
+				100000000000000000000014 /* GoogleSignInBrandButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +365,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				100000000000000000000007 /* BootstrapEventDecodingTests.swift in Sources */,
+				10000000000000000000000E /* NativeIdentityTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,12 +509,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTH_SITE_URL = "http://127.0.0.1:3211";
+				CODE_SIGN_ENTITLEMENTS = Starter/Starter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CONVEX_URL = "http://127.0.0.1:3210";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_IOS_CLIENT_ID = "replace-with-google-ios-client-id";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.replace-with-google-ios-client-id";
+				GOOGLE_SERVER_CLIENT_ID = "replace-with-google-web-client-id";
 				INFOPLIST_FILE = Starter/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -487,11 +542,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTH_SITE_URL = "https://replace-before-release.invalid";
+				CODE_SIGN_ENTITLEMENTS = Starter/Starter.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CONVEX_URL = "https://replace-before-release.invalid";
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_IOS_CLIENT_ID = "replace-with-google-ios-client-id";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.replace-with-google-ios-client-id";
+				GOOGLE_SERVER_CLIENT_ID = "replace-with-google-web-client-id";
 				INFOPLIST_FILE = Starter/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -632,6 +692,14 @@
 				version = 0.8.1;
 			};
 		};
+		A00000000000000000000003 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = exactVersion;
+				version = 9.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -639,6 +707,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A00000000000000000000001 /* XCRemoteSwiftPackageReference "convex-swift" */;
 			productName = ConvexMobile;
+		};
+		A00000000000000000000004 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A00000000000000000000003 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

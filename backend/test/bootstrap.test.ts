@@ -6,7 +6,7 @@ import refs from "../confect/_generated/refs";
 import * as TestConfect from "./TestConfect";
 
 describe("bootstrap contract", () => {
-  it.effect("publishes a ping through the reactive list query", () =>
+  it.effect("reports whether each ping reached Convex with an authenticated identity", () =>
     Effect.gen(function* () {
       const backend = yield* TestConfect.TestConfect;
 
@@ -16,10 +16,19 @@ describe("bootstrap contract", () => {
         client: "test",
       });
 
+      const authenticatedBackend = backend.withIdentity({
+        subject: "starter-test-user",
+      });
+      yield* authenticatedBackend.mutation(refs.public.bootstrap.ping, {
+        client: "test",
+      });
+
       const events = yield* backend.query(refs.public.bootstrap.list, {});
-      assertEquals(events.length, 1);
+      assertEquals(events.length, 2);
+      assertEquals(events[0]?.authenticated, true);
       assertEquals(events[0]?.client, "test");
       assertEquals(events[0]?.message, "Backend is connected");
+      assertEquals(events[1]?.authenticated, false);
     }).pipe(Effect.provide(TestConfect.layer())),
   );
 });

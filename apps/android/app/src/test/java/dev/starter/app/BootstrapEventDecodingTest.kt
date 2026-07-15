@@ -15,5 +15,6 @@ class BootstrapEventDecodingTest {
 
     assertEquals("test", event.client)
     assertEquals("Backend is connected", event.message)
+    assertEquals(true, event.authenticated)
   }
 }

@@ -16,6 +16,12 @@ readonly xcodebuild_bin="${XCODEBUILD_BIN:-xcodebuild}"
 readonly defaults_bin="${DEFAULTS_BIN:-defaults}"
 readonly plist_buddy_bin="${PLIST_BUDDY_BIN:-/usr/libexec/PlistBuddy}"
 readonly bun_bin="${BUN_BIN:-bun}"
+auth_xcconfig=""
+if ! auth_xcconfig="$($root/tooling/ios-auth-xcconfig.sh)"; then
+  printf '%s\n' "$auth_xcconfig"
+  exit 1
+fi
+readonly auth_xcconfig
 
 mkdir -p "$root/.devme"
 
@@ -86,7 +92,9 @@ build_app() {
   local device_id="$1"
   local development_team="$2"
   local backend_url="$3"
+  local auth_site_url="$4"
 
+  rm -rf "$derived_data"
   if ! "$xcodebuild_bin" build \
     -quiet \
     -project "$root/apps/ios/Starter.xcodeproj" \
@@ -95,11 +103,13 @@ build_app() {
     -destination "platform=iOS,id=$device_id" \
     -derivedDataPath "$derived_data" \
     -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
+    -xcconfig "$auth_xcconfig" \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
     DEVELOPMENT_TEAM="$development_team" \
     CODE_SIGN_STYLE=Automatic \
-    CONVEX_URL="$backend_url" >"$build_log" 2>&1; then
+    CONVEX_URL="$backend_url" \
+    AUTH_SITE_URL="$auth_site_url" >"$build_log" 2>&1; then
     tail -n 80 "$build_log" >&2
     fail \
       'Xcode could not build and sign Starter for the selected iPhone.' \
@@ -112,9 +122,10 @@ launch_app() {
   local device_name="$2"
   local development_team="$3"
   local backend_url="$4"
+  local auth_site_url="$5"
   local app="$derived_data/Build/Products/Debug-iphoneos/Starter.app"
 
-  build_app "$device_id" "$development_team" "$backend_url"
+  build_app "$device_id" "$development_team" "$backend_url" "$auth_site_url"
   if [[ ! -d "$app" ]]; then
     fail \
       'Xcode reported success without producing Starter.app.' \
@@ -152,6 +163,7 @@ launch_app() {
   printf '  device: %s\n' "$(toon_quote "$device_name")"
   printf '  bundle_id: %s\n' "$(toon_quote "$bundle_id")"
   printf '  backend_url: %s\n' "$(toon_quote "$backend_url")"
+  printf '  auth_site_url: %s\n' "$(toon_quote "$auth_site_url")"
 }
 
 latest_event() {
@@ -176,6 +188,7 @@ run_e2e() {
   local device_name="$2"
   local development_team="$3"
   local backend_url="$4"
+  local auth_site_url="$5"
   local before_event before_id latest_event_record latest_id latest_client
 
   if ! before_event="$(latest_event)"; then
@@ -185,6 +198,7 @@ run_e2e() {
   IFS=$'\t' read -r before_id _ <<<"$before_event"
 
   rm -rf "$result_bundle" "$attachments"
+  rm -rf "$derived_data"
   printf 'Keep %s unlocked with its screen awake while XCTest runs.\n' "$device_name" >&2
   if ! "$xcodebuild_bin" test \
     -quiet \
@@ -195,13 +209,15 @@ run_e2e() {
     -destination-timeout 30 \
     -derivedDataPath "$derived_data" \
     -clonedSourcePackagesDirPath "$root/.devme/SourcePackages" \
+    -xcconfig "$auth_xcconfig" \
     -resultBundlePath "$result_bundle" \
     -only-testing:StarterUITests \
     -allowProvisioningUpdates \
     -allowProvisioningDeviceRegistration \
     DEVELOPMENT_TEAM="$development_team" \
     CODE_SIGN_STYLE=Automatic \
-    CONVEX_URL="$backend_url" >"$e2e_log" 2>&1; then
+    CONVEX_URL="$backend_url" \
+    AUTH_SITE_URL="$auth_site_url" >"$e2e_log" 2>&1; then
     tail -n 100 "$e2e_log" >&2
     fail \
       'The physical iOS UI test did not complete successfully.' \
@@ -231,6 +247,7 @@ run_e2e() {
   printf '  status: passed\n'
   printf '  device: %s\n' "$(toon_quote "$device_name")"
   printf '  backend_url: %s\n' "$(toon_quote "$backend_url")"
+  printf '  auth_site_url: %s\n' "$(toon_quote "$auth_site_url")"
   printf '  result_bundle: %s\n' "$(toon_quote "$result_bundle")"
   printf '  attachments: %s\n' "$(toon_quote "$attachments")"
 }
@@ -240,6 +257,10 @@ case "${1:-}" in
     "$root/tooling/tailscale-convex.sh" require-ios-peer
     if ! backend_url="$("$root/tooling/tailscale-convex.sh" url)"; then
       printf '%s\n' "$backend_url"
+      exit 1
+    fi
+    if ! auth_site_url="$("$root/tooling/tailscale-convex.sh" site-url)"; then
+      printf '%s\n' "$auth_site_url"
       exit 1
     fi
     if ! device_record="$(resolve_device)"; then
@@ -253,9 +274,9 @@ case "${1:-}" in
     fi
 
     if [[ "$1" == "launch" ]]; then
-      launch_app "$device_id" "$device_name" "$development_team" "$backend_url"
+      launch_app "$device_id" "$device_name" "$development_team" "$backend_url" "$auth_site_url"
     else
-      run_e2e "$device_id" "$device_name" "$development_team" "$backend_url"
+      run_e2e "$device_id" "$device_name" "$development_team" "$backend_url" "$auth_site_url"
     fi
     ;;
   *)

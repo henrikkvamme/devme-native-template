@@ -17,5 +17,7 @@ final class BootstrapEventDecodingTests: XCTestCase {
 
     XCTAssertEqual(event.client, "test")
     XCTAssertEqual(event.message, "Backend is connected")
+    XCTAssertEqual(event.authenticated, true)
+    XCTAssertEqual(event.authenticationLabel, "Authenticated")
   }
 }

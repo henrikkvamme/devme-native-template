@@ -1,11 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-  @StateObject private var viewModel: HomeViewModel
-
-  init(backend: StarterBackend) {
-    _viewModel = StateObject(wrappedValue: HomeViewModel(backend: backend))
-  }
+  @ObservedObject var viewModel: HomeViewModel
 
   var body: some View {
     List {
@@ -36,16 +32,21 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 4) {
               Text(event.message)
                 .font(.headline)
-              Text(event.clientName)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+              HStack(spacing: 8) {
+                Text(event.clientName)
+                Text("•")
+                  .accessibilityHidden(true)
+                Label(event.authenticationLabel, systemImage: event.authenticationSymbol)
+                  .foregroundStyle(event.authenticated == true ? .green : .secondary)
+              }
+              .font(.caption)
+              .foregroundStyle(.secondary)
             }
           }
         }
       }
     }
     .navigationTitle("Starter")
-    .task { viewModel.start() }
   }
 
   private var connectionLabel: String {

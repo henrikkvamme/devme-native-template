@@ -6,6 +6,7 @@ source "$root/tooling/devme-ports.sh"
 readonly sdk_root="${ANDROID_SDK_ROOT:-$root/.devme/android-sdk}"
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
+readonly auth_site_port="$(devme_convex_site_port "$slot")"
 readonly emulator_port="$((5554 + slot * 2))"
 readonly serial="emulator-$emulator_port"
 readonly avd_name="starter-devme-$slot"
@@ -66,6 +67,7 @@ done
 "$root/apps/android/gradlew" \
   --project-dir "$root/apps/android" \
   -PconvexUrl="http://10.0.2.2:$convex_port" \
+  -PauthSiteUrl="http://10.0.2.2:$auth_site_port" \
   assembleDebug
 
 readonly apk="$root/apps/android/app/build/outputs/apk/debug/app-debug.apk"
