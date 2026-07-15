@@ -5,6 +5,7 @@ cmd = "DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh up"
 port = { base = 3210, slot_offset = 20 }
 url = "http://{host}:{port}"
 health = { http = "http://127.0.0.1:{port}/version" }
+readiness = { interval_ms = 1000, timeout_ms = 2000, retries = 180 }
 depends_on = ["root::docker"]
 
 [service.stripe-webhooks]
