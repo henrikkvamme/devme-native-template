@@ -2,7 +2,6 @@ import AuthenticationServices
 import SwiftUI
 
 struct SettingsView: View {
-  @Environment(\.colorScheme) private var colorScheme
   @Environment(\.openURL) private var openURL
   @ObservedObject var viewModel: HomeViewModel
   @State private var isConfirmingSignOut = false
@@ -93,15 +92,11 @@ struct SettingsView: View {
 
     case .native:
       VStack(spacing: 12) {
-        SignInWithAppleButton(.signIn) { request in
-          configureAppleRequest(request)
-        } onCompletion: { result in
-          completeAppleSignIn(result)
-        }
-        .signInWithAppleButtonStyle(colorScheme == .dark ? .white : .black)
-        .frame(height: 52)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .disabled(viewModel.isAuthenticating)
+        AppleSignInBrandButton(
+          isAuthenticating: viewModel.isAuthenticating,
+          onRequest: configureAppleRequest,
+          onCompletion: completeAppleSignIn
+        )
 
         GoogleSignInBrandButton(isAuthenticating: viewModel.isAuthenticating) {
           Task { await signInWithGoogle() }

@@ -1,26 +1,66 @@
+import AuthenticationServices
 import GoogleSignIn
 import SwiftUI
 import UIKit
 
+struct AppleSignInBrandButton: View {
+  @StateObject private var coordinator = AppleAuthorizationCoordinator()
+  let isAuthenticating: Bool
+  let onRequest: (ASAuthorizationAppleIDRequest) -> Void
+  let onCompletion: (Result<ASAuthorization, Error>) -> Void
+
+  var body: some View {
+    IdentityProviderButton(
+      title: "Sign in with Apple",
+      isAuthenticating: isAuthenticating,
+      icon: {
+        Image(systemName: "apple.logo")
+          .resizable()
+          .scaledToFit()
+          .foregroundStyle(.black)
+          .accessibilityHidden(true)
+      },
+      action: {
+        coordinator.start(onRequest: onRequest, onCompletion: onCompletion)
+      }
+    )
+  }
+}
+
 struct GoogleSignInBrandButton: View {
-  @Environment(\.displayScale) private var displayScale
   let isAuthenticating: Bool
   let action: () -> Void
 
   var body: some View {
+    IdentityProviderButton(
+      title: "Sign in with Google",
+      isAuthenticating: isAuthenticating,
+      icon: { GoogleBrandIcon() },
+      action: action
+    )
+  }
+}
+
+private struct IdentityProviderButton<Icon: View>: View {
+  @Environment(\.displayScale) private var displayScale
+  let title: String
+  let isAuthenticating: Bool
+  @ViewBuilder let icon: () -> Icon
+  let action: () -> Void
+
+  var body: some View {
     Button(action: action) {
-      ZStack {
-        Text("Sign in with Google")
+      HStack(spacing: 12) {
+        icon()
+          .frame(width: 20, height: 20)
+
+        Text(title)
           .font(.system(size: 14, weight: .medium))
           .foregroundStyle(Color(red: 31 / 255, green: 31 / 255, blue: 31 / 255))
 
-        HStack {
-          GoogleBrandIcon()
-            .frame(width: 20, height: 20)
-          Spacer()
-        }
-        .padding(.leading, 16)
+        Spacer(minLength: 0)
       }
+      .padding(.horizontal, 16)
       .frame(maxWidth: .infinity)
       .frame(height: 52)
       .background(.white)
@@ -34,9 +74,61 @@ struct GoogleSignInBrandButton: View {
       }
       .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
-    .buttonStyle(GoogleBrandButtonStyle())
+    .buttonStyle(IdentityProviderButtonStyle())
     .disabled(isAuthenticating)
-    .accessibilityLabel("Sign in with Google")
+    .accessibilityLabel(title)
+  }
+}
+
+@MainActor
+private final class AppleAuthorizationCoordinator: NSObject, ObservableObject {
+  private var authorizationController: ASAuthorizationController?
+  private var onCompletion: ((Result<ASAuthorization, Error>) -> Void)?
+
+  func start(
+    onRequest: (ASAuthorizationAppleIDRequest) -> Void,
+    onCompletion: @escaping (Result<ASAuthorization, Error>) -> Void
+  ) {
+    let request = ASAuthorizationAppleIDProvider().createRequest()
+    onRequest(request)
+
+    self.onCompletion = onCompletion
+    let controller = ASAuthorizationController(authorizationRequests: [request])
+    controller.delegate = self
+    controller.presentationContextProvider = self
+    authorizationController = controller
+    controller.performRequests()
+  }
+
+  private func finish(_ result: Result<ASAuthorization, Error>) {
+    onCompletion?(result)
+    onCompletion = nil
+    authorizationController = nil
+  }
+}
+
+extension AppleAuthorizationCoordinator: ASAuthorizationControllerDelegate {
+  func authorizationController(
+    controller: ASAuthorizationController,
+    didCompleteWithAuthorization authorization: ASAuthorization
+  ) {
+    finish(.success(authorization))
+  }
+
+  func authorizationController(
+    controller: ASAuthorizationController,
+    didCompleteWithError error: Error
+  ) {
+    finish(.failure(error))
+  }
+}
+
+extension AppleAuthorizationCoordinator: ASAuthorizationControllerPresentationContextProviding {
+  func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+    UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap(\.windows)
+      .first(where: \.isKeyWindow) ?? ASPresentationAnchor()
   }
 }
 
@@ -65,7 +157,7 @@ private struct GoogleBrandIcon: View {
   }
 }
 
-private struct GoogleBrandButtonStyle: ButtonStyle {
+private struct IdentityProviderButtonStyle: ButtonStyle {
   func makeBody(configuration: Configuration) -> some View {
     configuration.label
       .opacity(configuration.isPressed ? 0.82 : 1)
