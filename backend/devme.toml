@@ -7,6 +7,10 @@ url = "http://{host}:{port}"
 health = { http = "http://127.0.0.1:{port}/version" }
 depends_on = ["root::docker"]
 
+[service.stripe-webhooks]
+cmd = "DEVME_SLOT={slot} bash ../tooling/stripe-webhooks.sh"
+depends_on = ["convex", "root::dependencies", "root::stripe-cli"]
+
 [task.codegen]
 kind = "utility"
 description = "Generate the Confect and Convex boundary code"
@@ -57,6 +61,15 @@ steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
 
+[task.billing-doctor]
+kind = "utility"
+description = "Compare the latest active Stripe sandbox subscription with Better Auth"
+cmd = "DEVME_SLOT={slot} bash ../tooling/stripe-webhooks.sh doctor"
+depends_on = ["deploy"]
+steps = ["root::dependencies", "root::stripe-cli"]
+services = ["convex"]
+timeout = 180
+
 [task.auth-configure]
 kind = "utility"
 description = "Validate .env.auth.local, apply it to local Convex, and redeploy"
@@ -85,8 +98,8 @@ timeout = 180
 
 [task.launch]
 kind = "launch"
-description = "Start and deploy the local Convex backend"
+description = "Start Convex, deploy the backend, and forward Stripe webhooks"
 cmd = "true"
 depends_on = ["deploy"]
-services = ["convex"]
+services = ["convex", "stripe-webhooks"]
 timeout = 180

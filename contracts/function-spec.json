@@ -43,6 +43,25 @@
     {
       "args": {
         "type": "object",
+        "value": {
+          "referenceId": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:subscriptionForDiagnostics",
+      "returns": null,
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
         "value": {}
       },
       "functionType": "Query",

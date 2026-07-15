@@ -57,11 +57,7 @@ describe("auth configuration", () => {
 
   it("accepts a complete Stripe group without requiring unrelated providers", async () => {
     const configuration = await prepareConfiguration(
-      [
-        "STRIPE_SECRET_KEY=sk_test_realistic",
-        "STRIPE_WEBHOOK_SECRET=whsec_realistic",
-        "STRIPE_PRICE_ID=price_realistic",
-      ].join("\n"),
+      ["STRIPE_SECRET_KEY=sk_test_realistic", "STRIPE_PRICE_ID=price_realistic"].join("\n"),
       "/workspace",
     );
 
@@ -129,7 +125,7 @@ describe("auth configuration", () => {
       {
         name: "stripe",
         status: "missing",
-        missing: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"],
+        missing: ["STRIPE_SECRET_KEY", "STRIPE_PRICE_ID"],
       },
     ]);
   });

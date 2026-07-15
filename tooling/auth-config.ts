@@ -41,7 +41,7 @@ const groups = {
   },
   stripe: {
     accepted: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"],
-    required: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"],
+    required: ["STRIPE_SECRET_KEY", "STRIPE_PRICE_ID"],
   },
 } as const;
 

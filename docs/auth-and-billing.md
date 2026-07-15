@@ -10,6 +10,14 @@ devme run backend::auth-live-smoke --output toon
 
 The check creates or restores a Better Auth bearer session, exchanges it for a Convex JWT, calls an authenticated Convex query, lists Stripe subscriptions, and verifies that an unsigned Stripe webhook is rejected.
 
+App launch tasks also start `backend::stripe-webhooks`. It uses the configured Stripe sandbox key, injects the matching Stripe CLI signing secret into local Convex, and forwards checkout and subscription lifecycle events. No separate `stripe listen` command is required.
+
+After a sandbox checkout, agents can verify that Stripe and Better Auth agree:
+
+```sh
+devme run backend::billing-doctor --output toon
+```
+
 ## Native flow
 
 1. The Apple or Google native SDK returns an ID token.
@@ -32,7 +40,7 @@ Set these on the Convex deployment:
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, and `STRIPE_PRICE_ID`
 - `JWKS`, generated after the first deployment
 
-Configure the Stripe webhook as `/api/auth/stripe/webhook` and subscribe to checkout and subscription lifecycle events. Production Convex origins must use the real public sync and HTTP-action domains.
+Configure the production Stripe webhook as `/api/auth/stripe/webhook` and subscribe to `checkout.session.completed` plus the created, updated, and deleted customer subscription events. Use the endpoint signing secret as `STRIPE_WEBHOOK_SECRET`. The local Devme listener is only for sandbox development. Production Convex origins must use the real public sync and HTTP-action domains.
 
 ## Confect constraint
 
