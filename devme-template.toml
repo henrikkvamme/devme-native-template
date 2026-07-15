@@ -1,0 +1,8 @@
+schema_version = 1
+name = "native"
+version = "2026.7.15"
+
+[base]
+repository = "https://github.com/henrikkvamme/devme-native-template.git"
+revision = "core-template-20260715"
+subdir = "."
