@@ -15,7 +15,7 @@ trap cleanup EXIT
 cat >"$fake_bin/docker" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-printf '%s\n' "$*" >>"$DOCKER_LOG"
+printf '%s %s\n' "$COMPOSE_PROJECT_NAME" "$*" >>"$DOCKER_LOG"
 if [[ " $* " == *" up "* ]]; then
   trap 'exit 0' INT TERM
   while true; do sleep 1; done
@@ -37,6 +37,7 @@ for _ in {1..50}; do
   sleep 0.1
 done
 grep -q 'compose.* up .*--remove-orphans' "$docker_log"
+grep -Eq '^starter-[[:xdigit:]]{8}-99 compose.* up .*--remove-orphans' "$docker_log"
 
 kill -TERM "$service_pid"
 set +e

@@ -1,8 +1,35 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.4"
+version = "2026.7.16.5"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
-revision = "472aff1ab47bd5bef7bceb90f84bd325a04d55ad"
+revision = "91d1814678aa4b9eb4b4544be870cac8f82824f1"
 subdir = "."
+
+[features.auth]
+version = "1.0.0"
+path = "features/auth"
+external_steps = [
+  "Choose final iOS and Android application identifiers before creating provider credentials.",
+  "Follow the current Better Auth, Apple, and Google setup links in docs/ios-auth-interface.md.",
+  "Copy .env.auth.example to .env.auth.local, provide at least one complete provider, then run devme run backend::auth-configure --output toon.",
+]
+remove_external_steps = [
+  "Delete local auth secrets and revoke provider credentials that are no longer used.",
+  "Remove unused Apple and Google application registrations only after confirming no deployed app depends on them.",
+]
+
+[features.stripe]
+version = "1.0.0"
+path = "features/stripe"
+dependencies = ["auth"]
+external_steps = [
+  "Create or select a Stripe sandbox product and recurring price.",
+  "Add STRIPE_SECRET_KEY and STRIPE_PRICE_ID to .env.auth.local, then rerun devme run backend::auth-configure --output toon.",
+  "Run devme up and keep backend::stripe-webhooks healthy while testing sandbox checkout.",
+]
+remove_external_steps = [
+  "Cancel test subscriptions and remove Stripe webhook endpoints that are no longer needed.",
+  "Delete Stripe secrets from local and deployed environments after the final dependent deployment is removed.",
+]

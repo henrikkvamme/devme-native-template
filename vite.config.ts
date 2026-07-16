@@ -11,7 +11,12 @@ export default defineConfig({
     semi: true,
   },
   lint: {
-    ignorePatterns: ["apps/**", "backend/confect/_generated/**", "backend/convex/_generated/**"],
+    ignorePatterns: [
+      "apps/**",
+      "backend/confect/_generated/**",
+      "backend/convex/_generated/**",
+      "features/**",
+    ],
     options: {
       typeAware: true,
       typeCheck: true,
@@ -21,6 +26,6 @@ export default defineConfig({
     "*.{js,json,ts}": ["vp fmt", "vp lint"],
   },
   test: {
-    include: ["backend/**/*.test.ts"],
+    include: ["backend/**/*.test.ts", "tooling/**/*.test.ts"],
   },
 });
