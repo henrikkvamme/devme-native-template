@@ -36,6 +36,8 @@ services:
       interval: 2s
       timeout: 3s
       retries: 60
+    volumes:
+      - backend-data:/convex/data
 
   dashboard:
     image: ghcr.io/get-convex/convex-dashboard:latest@sha256:60b04b339d6cd6623057b03e5275329a20011051907ec5e689a38a401cfdc409
@@ -48,4 +50,5 @@ services:
       - "127.0.0.1:${CONVEX_DASHBOARD_PORT:-6791}:6791"
 
 volumes:
+  backend-data:
   postgres-data:
