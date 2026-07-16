@@ -1,6 +1,7 @@
 .DS_Store
 .devme/
 .env.local
+.env.auth.local
 .idea/
 *.iml
 node_modules/
