@@ -23,8 +23,8 @@ provision = "printf 'Install Bun 1.3.13 or newer from https://bun.sh/docs/instal
 trust = "manual"
 
 [step.dependencies]
-check = "test -d node_modules && test -d backend/node_modules"
-provision = "bun install --frozen-lockfile"
+check = "test -d node_modules && test -d backend/node_modules && cmp -s bun.lock .devme/bun-lock.installed"
+provision = "bun install --frozen-lockfile && mkdir -p .devme && cp bun.lock .devme/bun-lock.installed"
 trust = "auto"
 depends_on = ["bun"]
 
