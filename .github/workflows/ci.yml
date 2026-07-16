@@ -46,17 +46,7 @@ jobs:
 
       - name: Run portable Devme checks
         timeout-minutes: 20
-        run: |
-          for task in \
-            tooling-test \
-            typescript-check \
-            backend::test \
-            backend::live-smoke \
-            backend::auth-live-smoke \
-            backend::contract-check
-          do
-            devme run "$task" --output toon
-          done
+        run: devme run ci-core --output toon
 
       - name: Preserve backend diagnostics
         if: failure()
