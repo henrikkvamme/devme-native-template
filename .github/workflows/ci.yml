@@ -41,6 +41,9 @@ jobs:
       - name: Run portable Devme checks
         run: devme run ci-core --output toon
 
+      - name: Exercise the public project recipe
+        run: devme run recipe-e2e --output toon
+
       - name: Stop local services
         if: always()
         run: devme down || true

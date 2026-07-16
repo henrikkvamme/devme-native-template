@@ -1,6 +1,6 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.6"
+version = "2026.7.16.7"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
@@ -8,7 +8,7 @@ revision = "91d1814678aa4b9eb4b4544be870cac8f82824f1"
 subdir = "."
 
 [features.auth]
-version = "1.0.0"
+version = "1.0.1"
 path = "features/auth"
 external_steps = [
   "Choose final iOS and Android application identifiers before creating provider credentials.",

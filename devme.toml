@@ -56,6 +56,12 @@ cmd = "bun run check"
 steps = ["dependencies"]
 timeout = 180
 
+[task.recipe-e2e]
+kind = "check"
+description = "Create a fresh project and exercise Auth and Stripe composition"
+cmd = "bash tooling/recipe-e2e.sh"
+timeout = 900
+
 [task.ci-core]
 kind = "check"
 description = "Run portable tooling and backend CI checks"

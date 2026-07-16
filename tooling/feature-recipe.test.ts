@@ -14,6 +14,12 @@ describe("native feature recipe", () => {
     );
     expect(read("features/auth/backend/devme.toml")).not.toContain("stripe-webhooks");
     expect(read("features/auth/apps/ios/Starter/Info.plist")).not.toContain("billing");
+    expect(read("features/auth/apps/android/app/build.gradle.kts")).not.toContain(
+      "ANDROID_UPLOAD_KEYSTORE",
+    );
+    expect(read("features/auth/apps/android/app/build.gradle.kts")).not.toContain(
+      "android-release-preflight",
+    );
   });
 
   it("declares Stripe as an auth-dependent, reversible feature", () => {

@@ -16,30 +16,6 @@ val releaseConvexUrl = providers
 val releaseAuthSiteUrl = providers
   .gradleProperty("releaseAuthSiteUrl")
   .orElse("https://replace-before-release.invalid")
-val releaseVersionCode = providers
-  .gradleProperty("versionCode")
-  .map(String::toInt)
-  .orElse(1)
-val releaseVersionName = providers
-  .gradleProperty("versionName")
-  .orElse("1.0")
-val releaseApplicationId = "dev.starter.app"
-
-val uploadKeystorePath = System.getenv("ANDROID_UPLOAD_KEYSTORE_PATH")
-val uploadKeystorePassword = System.getenv("ANDROID_UPLOAD_KEYSTORE_PASSWORD")
-val uploadKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS")
-val uploadKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD")
-val releaseSigningValues = listOf(
-  uploadKeystorePath,
-  uploadKeystorePassword,
-  uploadKeyAlias,
-  uploadKeyPassword,
-)
-val releaseSigningConfigured = releaseSigningValues.all { !it.isNullOrBlank() }
-
-require(releaseSigningValues.none { !it.isNullOrBlank() } || releaseSigningConfigured) {
-  "Android release signing is partially configured. Set all ANDROID_UPLOAD_KEYSTORE_* variables."
-}
 
 configurations.configureEach {
   // Convex 0.8.0 pins JNA 5.14.0, whose native binary cannot load on 16 KB
@@ -47,42 +23,16 @@ configurations.configureEach {
   resolutionStrategy.force("net.java.dev.jna:jna:5.19.1")
 }
 
-val validateReleaseConfiguration by tasks.registering(Exec::class) {
-  group = "verification"
-  description = "Fail when Android release signing or endpoints are not configured"
-  environment("RELEASE_APPLICATION_ID", releaseApplicationId)
-  environment("RELEASE_CONVEX_URL", releaseConvexUrl.get())
-  environment("RELEASE_AUTH_SITE_URL", releaseAuthSiteUrl.get())
-  commandLine("bash", rootProject.file("../../tooling/android-release-preflight.sh"))
-}
-
-tasks.configureEach {
-  if (name.contains("release", ignoreCase = true) && name != "validateReleaseConfiguration") {
-    dependsOn(validateReleaseConfiguration)
-  }
-}
-
 android {
   namespace = "dev.starter.app"
   compileSdk = 37
 
-  signingConfigs {
-    if (releaseSigningConfigured) {
-      create("release") {
-        storeFile = file(uploadKeystorePath!!)
-        storePassword = uploadKeystorePassword
-        keyAlias = uploadKeyAlias
-        keyPassword = uploadKeyPassword
-      }
-    }
-  }
-
   defaultConfig {
-    applicationId = releaseApplicationId
+    applicationId = "dev.starter.app"
     minSdk = 26
     targetSdk = 37
-    versionCode = releaseVersionCode.get()
-    versionName = releaseVersionName.get()
+    versionCode = 1
+    versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -106,9 +56,6 @@ android {
       )
     }
     release {
-      if (releaseSigningConfigured) {
-        signingConfig = signingConfigs.getByName("release")
-      }
       buildConfigField(
         "String",
         "CONVEX_URL",
