@@ -48,5 +48,5 @@ if [[ "$service_status" -ne 0 && "$service_status" -ne 143 ]]; then
   exit 1
 fi
 
-grep -q 'compose.* down .*--remove-orphans' "$docker_log"
+grep -q 'compose.* down .*--remove-orphans .*--timeout 1' "$docker_log"
 printf 'Convex service cleanup test passed.\n'

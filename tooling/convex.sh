@@ -103,7 +103,7 @@ run_compose_service() {
     trap - EXIT INT TERM
     kill "$compose_pid" 2>/dev/null || true
     wait "$compose_pid" 2>/dev/null || true
-    compose down --remove-orphans
+    compose down --remove-orphans --timeout 1
   }
   trap cleanup_compose_service EXIT INT TERM
   wait "$compose_pid"
