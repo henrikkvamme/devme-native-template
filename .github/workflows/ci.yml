@@ -31,7 +31,7 @@ jobs:
         # Pin the reviewed project-composer revision until it is included in a
         # tagged Devme release.
         env:
-          DEVME_REVISION: 1064aae7f6cfa2c7076242ff2c8a5bff7c6b7081
+          DEVME_REVISION: c7c2a5f1ff3eb597388604d31f4f55867d1da2ff
         run: |
           git clone --filter=blob:none https://github.com/devme-sh/devme.git "$RUNNER_TEMP/devme"
           git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
