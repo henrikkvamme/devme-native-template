@@ -59,9 +59,20 @@ jobs:
       - name: Test Starter
         run: |
           bash tooling/ios-test.sh && exit 0
-          printf 'First simulator attempt failed. Resetting CoreSimulator and retrying once.\n' >&2
+          printf 'First simulator attempt failed. Erasing CoreSimulator and retrying once.\n' >&2
           xcrun simctl shutdown all || true
+          xcrun simctl erase all
+          rm -rf .devme/DerivedData-0
           bash tooling/ios-test.sh
+
+      - name: Preserve iOS test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ios-test-diagnostics
+          path: .devme/DerivedData-0/Logs/Test/*.xcresult
+          if-no-files-found: warn
+          retention-days: 7
 
   android:
     name: Android unit tests and lint
