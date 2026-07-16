@@ -2,7 +2,7 @@
 
 Native iOS and Android starter with a self-hosted Convex backend and Devme.
 
-## Start
+## Create
 
 Install Devme:
 
@@ -10,17 +10,29 @@ Install Devme:
 curl -fsSL https://devme.sh/install | sh
 ```
 
-_One command is all you need_:
+```sh
+devme create native my-app
+cd my-app
+```
+
+Add optional capabilities when needed:
+
+```sh
+devme feature add auth
+devme feature add stripe
+```
+
+Stripe includes Auth. Feature changes install dependencies and reload services automatically.
+
+## Run
 
 ```sh
 devme
 ```
 
-## Customize
-
 Rename the `Starter` targets and replace the `dev.starter.app` identifiers before shipping.
 
-The `codex/better-auth-stripe-spike` branch explores optional authentication and billing. See [docs/auth-and-billing.md](docs/auth-and-billing.md).
+See [Auth and Stripe](docs/auth-and-billing.md) for provider setup.
 
 ## Ship
 

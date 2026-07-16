@@ -1,6 +1,6 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.9"
+version = "2026.7.16.10"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
@@ -21,13 +21,13 @@ remove_external_steps = [
 ]
 
 [features.stripe]
-version = "1.0.1"
+version = "1.0.2"
 path = "features/stripe"
 dependencies = ["auth"]
 external_steps = [
   "Create or select a Stripe sandbox product and recurring price.",
   "Add STRIPE_SECRET_KEY and STRIPE_PRICE_ID to .env.auth.local, then rerun devme run backend::auth-configure --output toon.",
-  "Run devme up and keep backend::stripe-webhooks healthy while testing sandbox checkout.",
+  "Keep backend::stripe-webhooks healthy while testing sandbox checkout.",
 ]
 remove_external_steps = [
   "Cancel test subscriptions and remove Stripe webhook endpoints that are no longer needed.",

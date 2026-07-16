@@ -1,14 +1,29 @@
-# Auth and billing spike
+# Auth and Stripe
 
-This branch tests Better Auth and Stripe directly on self-hosted Convex. Hono is not required. It proves the backend session and JWT flow plus compile-time native transport bridges. It is not yet a finished auth UI or a live billing integration.
+Auth uses Better Auth directly on self-hosted Convex. Stripe extends Auth with subscriptions, checkout, webhook synchronization, and customer management. Hono is not required.
 
-## Proven locally
+## Add
+
+```sh
+devme feature add auth
+devme feature add stripe
+```
+
+Stripe installs Auth automatically. Devme installs changed dependencies and reloads the service graph in the same command.
+
+Copy `.env.auth.example` to `.env.auth.local`, configure the providers you need, then apply them:
+
+```sh
+devme run backend::auth-configure --output toon
+```
+
+## Verify
 
 ```sh
 devme run backend::auth-live-smoke --output toon
 ```
 
-The check creates or restores a Better Auth bearer session, exchanges it for a Convex JWT, calls an authenticated Convex query, lists Stripe subscriptions, and verifies that an unsigned Stripe webhook is rejected.
+The smoke check creates a Better Auth session, exchanges it for a Convex JWT, calls an authenticated Convex query, reads subscriptions, and rejects an unsigned Stripe webhook.
 
 App launch tasks also start `backend::stripe-webhooks`. It uses the configured Stripe sandbox key, injects the matching Stripe CLI signing secret into local Convex, and forwards checkout and subscription lifecycle events. No separate `stripe listen` command is required.
 
@@ -26,7 +41,7 @@ devme run backend::billing-doctor --output toon
 4. The app sends that bearer token to `/api/auth/convex/token` when the Convex client needs a short-lived JWT.
 5. `ConvexClientWithAuth` uses the JWT for authenticated queries and refreshes it through the same endpoint.
 
-The Swift and Kotlin `BetterAuthNativeClient` implementations contain this transport and implement the Convex auth-provider bridge. Platform-specific Apple and Google SDK adapters remain credential-dependent application code.
+The iOS feature includes native Apple and Google sign-in, Keychain session storage, profile presentation, authenticated pings, subscription state, checkout, and sign-out. Android includes the Kotlin transport and Convex auth-provider bridge plus authenticated event contracts. Wire the final Credential Manager and provider UI after choosing the Android application identifier.
 
 Convex sync and HTTP actions use different URLs. Local slot 0 uses `http://127.0.0.1:3210` for sync and `http://127.0.0.1:3211` for auth. The physical-device Devme helper exposes both through private Tailscale HTTPS endpoints.
 
@@ -46,6 +61,4 @@ Configure the production Stripe webhook as `/api/auth/stripe/webhook` and subscr
 
 Confect owns the Convex functions directory and deletes handwritten Better Auth modules. `tooling/backend-codegen.sh` therefore applies a reviewed auth overlay after Confect code generation, regenerates the Better Auth schema, and formats the result. This seam is deterministic, but it is the main added complexity of keeping Confect with Better Auth.
 
-## Provisional starter decision
-
-Keep the minimal default branch unauthenticated while this remains credential-unverified. If live Apple, Google, and Stripe tests pass, publish the completed integration as a separate auth-and-billing branch or template variant. The current evidence is enough to keep this complexity off the default branch, but not enough to choose or publish the final authenticated starter.
+Removing source does not revoke provider credentials, delete accounts, cancel subscriptions, or remove Stripe webhooks. Complete the external cleanup steps reported by Devme.
