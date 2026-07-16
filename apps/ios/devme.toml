@@ -14,6 +14,7 @@ depends_on = ["backend::deploy"]
 steps = ["root::dependencies"]
 services = ["backend::convex"]
 timeout = 1200
+artifacts = [".devme/ios-simulator-build-{slot}.log"]
 
 [task.device]
 kind = "launch"
@@ -24,17 +25,21 @@ steps = ["root::dependencies", "tailscale"]
 services = ["backend::convex"]
 resources = ["root::ios-device"]
 timeout = 1200
+artifacts = [".devme/ios-device-build-{slot}.log"]
 
 [task.test]
 kind = "check"
+visibility = "internal"
 description = "Build and test the iOS app on a simulator"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-test.sh"
 services = ["backend::convex"]
 resources = ["root::ios-simulator"]
 timeout = 1200
+artifacts = [".devme/DerivedData-{slot}/Logs/Test"]
 
 [task.e2e]
 kind = "check"
+visibility = "internal"
 description = "Verify an iOS mutation and reactive UI in Simulator"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-e2e.sh"
 depends_on = ["backend::deploy"]
@@ -42,9 +47,11 @@ steps = ["root::dependencies"]
 services = ["backend::convex"]
 resources = ["root::ios-simulator"]
 timeout = 1200
+artifacts = [".devme/ios-e2e-{slot}.xcresult", ".devme/ios-e2e-attachments-{slot}"]
 
 [task.device-e2e]
 kind = "check"
+visibility = "internal"
 description = "Verify the Convex mutation and reactive UI on a physical iPhone"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-device.sh e2e"
 depends_on = ["device-backend"]
@@ -52,9 +59,11 @@ steps = ["root::dependencies", "tailscale"]
 services = ["backend::convex"]
 resources = ["root::ios-device"]
 timeout = 1200
+artifacts = [".devme/ios-device-e2e-{slot}.xcresult", ".devme/ios-device-e2e-attachments-{slot}"]
 
 [task.device-backend]
 kind = "utility"
+visibility = "internal"
 description = "Expose local Convex through private Tailscale HTTPS"
 cmd = "DEVME_SLOT={slot} ../../tooling/tailscale-convex.sh ensure"
 depends_on = ["backend::deploy"]
@@ -64,6 +73,7 @@ timeout = 120
 
 [task.device-backend-stop]
 kind = "utility"
+visibility = "internal"
 description = "Remove this worktree's physical-device Tailscale endpoint"
 cmd = "DEVME_SLOT={slot} ../../tooling/tailscale-convex.sh stop"
 steps = ["tailscale"]
