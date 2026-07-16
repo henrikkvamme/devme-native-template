@@ -2,6 +2,7 @@
 set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly workspace_key="$(printf '%s' "$root" | openssl dgst -sha256 -r | cut -c1-8)"
 source "$root/tooling/devme-ports.sh"
 readonly compose_file="$root/infrastructure/convex/compose.yaml"
 readonly slot="${DEVME_SLOT:-0}"
@@ -28,13 +29,13 @@ resolve_instance_secret() {
   printf '%s\n' "$secret"
 }
 
-export COMPOSE_PROJECT_NAME="starter-$slot"
+export COMPOSE_PROJECT_NAME="starter-$workspace_key-$slot"
 export CONVEX_PORT="$convex_port"
 export CONVEX_SITE_PORT="$site_port"
 export CONVEX_DASHBOARD_PORT="$dashboard_port"
 export POSTGRES_PORT="$postgres_port"
-export CONVEX_INSTANCE_NAME="starter-$slot"
-export CONVEX_DATABASE_NAME="starter_$slot"
+export CONVEX_INSTANCE_NAME="starter-$workspace_key-$slot"
+export CONVEX_DATABASE_NAME="starter_${workspace_key}_$slot"
 export CONVEX_INSTANCE_SECRET="$(resolve_instance_secret)"
 
 compose() {
