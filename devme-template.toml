@@ -4,7 +4,7 @@ version = "2026.7.16.12"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
-revision = "c3ff01bedb5a49f38d329c9b231d5e77a6b23bcf"
+revision = "a8c983f5a68edb0dedbecee136835a79d34084cc"
 subdir = "."
 
 [features.auth]
