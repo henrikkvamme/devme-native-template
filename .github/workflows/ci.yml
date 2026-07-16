@@ -17,7 +17,7 @@ jobs:
   core:
     name: Tooling and backend
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - name: Check out repository
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
@@ -37,6 +37,10 @@ jobs:
           git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
           cargo build --release --locked --workspace --bins --manifest-path "$RUNNER_TEMP/devme/Cargo.toml"
           echo "$RUNNER_TEMP/devme/target/release" >> "$GITHUB_PATH"
+
+      - name: Pull pinned Convex services
+        timeout-minutes: 10
+        run: docker compose --file infrastructure/convex/compose.yaml pull
 
       - name: Run portable Devme checks
         run: devme run ci-core --output toon
