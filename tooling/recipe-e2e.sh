@@ -33,6 +33,14 @@ export PATH="$sandbox/bin:$PATH"
   --output toon
 
 test ! -e "$project/backend/convex/betterAuth"
+mkdir -p \
+  "$project/.devme/android-sdk/platforms/android-37.0" \
+  "$project/.devme/android-sdk/platform-tools"
+cat >"$project/.devme/android-sdk/platform-tools/adb" <<'SH'
+#!/usr/bin/env bash
+exit 0
+SH
+chmod +x "$project/.devme/android-sdk/platform-tools/adb"
 
 (
   cd "$project"
