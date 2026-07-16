@@ -58,6 +58,7 @@ output="$({
 })"
 
 [[ "$output" == *'status: launched'* ]]
+[[ "$output" == *'simulator_udid: "AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"'* ]]
 [[ "$output" == *'bundle_id: "dev.starter.app"'* ]]
 grep -Fq 'simctl install AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE' "$FAKE_LOG"
 grep -Fq 'simctl launch --terminate-running-process AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE dev.starter.app' "$FAKE_LOG"
