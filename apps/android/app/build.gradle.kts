@@ -10,9 +10,6 @@ val debugConvexUrl = providers
 val releaseConvexUrl = providers
   .gradleProperty("releaseConvexUrl")
   .orElse("https://replace-before-release.invalid")
-val releaseAuthSiteUrl = providers
-  .gradleProperty("releaseAuthSiteUrl")
-  .orElse("https://replace-before-release.invalid")
 val releaseVersionCode = providers
   .gradleProperty("versionCode")
   .map(String::toInt)
@@ -49,7 +46,6 @@ val validateReleaseConfiguration by tasks.registering(Exec::class) {
   description = "Fail when Android release signing or endpoints are not configured"
   environment("RELEASE_APPLICATION_ID", releaseApplicationId)
   environment("RELEASE_CONVEX_URL", releaseConvexUrl.get())
-  environment("RELEASE_AUTH_SITE_URL", releaseAuthSiteUrl.get())
   commandLine("bash", rootProject.file("../../tooling/android-release-preflight.sh"))
 }
 
@@ -106,7 +102,6 @@ android {
         "CONVEX_URL",
         "\"${releaseConvexUrl.get()}\"",
       )
-      buildConfigField("String", "AUTH_SITE_URL", "\"${releaseAuthSiteUrl.get()}\"")
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(

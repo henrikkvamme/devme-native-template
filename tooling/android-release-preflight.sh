@@ -20,10 +20,17 @@ if [[ "${RELEASE_APPLICATION_ID:-}" == "dev.starter.app" || -z "${RELEASE_APPLIC
   exit 1
 fi
 
-for name in RELEASE_CONVEX_URL RELEASE_AUTH_SITE_URL; do
+for name in RELEASE_CONVEX_URL; do
   value="${!name:-}"
   if [[ "$value" != https://* || "$value" == *replace-before-release* ]]; then
     printf '%s must be a production HTTPS URL.\n' "$name" >&2
     exit 1
   fi
 done
+
+if [[ -n "${RELEASE_AUTH_SITE_URL:-}" ]]; then
+  if [[ "$RELEASE_AUTH_SITE_URL" != https://* || "$RELEASE_AUTH_SITE_URL" == *replace-before-release* ]]; then
+    printf 'RELEASE_AUTH_SITE_URL must be a production HTTPS URL.\n' >&2
+    exit 1
+  fi
+fi

@@ -23,13 +23,16 @@ cat >"$sdk/platform-tools/adb" <<'SH'
 set -euo pipefail
 printf 'adb %s\n' "$*" >>"$COMMAND_LOG"
 if [[ " $* " == *" shell getprop sys.boot_completed "* ]]; then
-  printf '1\n'
+  if [[ -f "$BOOT_MARKER" ]]; then
+    printf '1\n'
+  fi
 fi
 SH
 
 cat >"$sdk/emulator/emulator" <<'SH'
 #!/usr/bin/env bash
 printf 'emulator %s\n' "$*" >>"$COMMAND_LOG"
+touch "$BOOT_MARKER"
 SH
 
 cat >"$temporary_directory/gradle" <<'SH'
@@ -41,6 +44,7 @@ chmod +x "$sdk/platform-tools/adb" "$sdk/emulator/emulator" "$temporary_director
 
 output="$({
   COMMAND_LOG="$commands" \
+  BOOT_MARKER="$temporary_directory/booted" \
   ANDROID_SDK_ROOT="$sdk" \
   ANDROID_AVD_HOME="$temporary_directory/avd" \
   ADB_BIN="$sdk/platform-tools/adb" \
@@ -52,6 +56,7 @@ output="$({
 })"
 
 grep -q 'gradle .*assembleDebug' "$commands"
+grep -q 'emulator -avd starter-devme-0 -port 5554' "$commands"
 grep -q 'adb -s emulator-5554 install -r' "$commands"
 grep -q 'shell am start -W -n dev.starter.app/.MainActivity' "$commands"
 grep -q 'target: "emulator-5554"' <<<"$output"
