@@ -9,6 +9,8 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 describe("native feature recipe", () => {
   it("keeps auth independent from Stripe", () => {
     expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/stripe");
+    expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/cli");
+    expect(read("features/auth/backend/package.json")).toContain('"auth": "1.6.23"');
     expect(read("features/auth/backend/convex/betterAuth/auth.ts")).not.toContain(
       "@better-auth/stripe",
     );
@@ -33,6 +35,9 @@ describe("native feature recipe", () => {
     expect(manifest.match(/remove_external_steps/g)).toHaveLength(4);
     expect(read("features/billing-stripe-external/backend/package.json")).toContain(
       "@better-auth/stripe",
+    );
+    expect(read("features/billing-stripe-external/backend/package.json")).toContain(
+      '"auth": "1.6.23"',
     );
     expect(read("features/billing-stripe-external/backend/convex/betterAuth/auth.ts")).toContain(
       "ACTIVE_SUBSCRIPTION",
