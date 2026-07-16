@@ -28,10 +28,10 @@ jobs:
           bun-version: 1.3.13
 
       - name: Build pinned Devme
-        # The v0.4.1 release predates one-shot tasks. Use the reviewed source
-        # revision until a release containing the task runner is published.
+        # Pin the reviewed project-composer revision until it is included in a
+        # tagged Devme release.
         env:
-          DEVME_REVISION: dc8a4c92b6f1e00ddd0ccb46d80a78fd65b4695b
+          DEVME_REVISION: 55d39e9138ab4cffd653bb6828dd1da8b8dbee69
         run: |
           git clone --filter=blob:none https://github.com/devme-sh/devme.git "$RUNNER_TEMP/devme"
           git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
