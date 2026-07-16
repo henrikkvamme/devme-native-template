@@ -45,7 +45,25 @@ jobs:
         run: docker compose --file infrastructure/convex/compose.yaml pull
 
       - name: Run portable Devme checks
-        run: devme run ci-core --output toon
+        timeout-minutes: 20
+        run: |
+          for task in \
+            tooling-test \
+            typescript-check \
+            backend::test \
+            backend::live-smoke \
+            backend::auth-live-smoke \
+            backend::contract-check
+          do
+            devme run "$task" --output toon
+          done
+
+      - name: Preserve backend diagnostics
+        if: failure()
+        run: |
+          devme doctor --output json || true
+          devme logs --since 30m --json || true
+          docker ps --all || true
 
       - name: Exercise the public project recipe
         run: devme run recipe-e2e --output toon
