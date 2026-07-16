@@ -1,8 +1,8 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.1"
+version = "2026.7.16.2"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
-revision = "b606c7383053460332700d05e83fc0b9013b68f3"
+revision = "1ceac87554de301a70037151df691c50458f71bb"
 subdir = "."
