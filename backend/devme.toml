@@ -1,7 +1,7 @@
 schema_version = 1
 
 [service.convex]
-cmd = "DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh up"
+cmd = "docker info >/dev/null && DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh up"
 port = { base = 3210, slot_offset = 20 }
 url = "http://{host}:{port}"
 health = { http = "http://127.0.0.1:{port}/version" }
