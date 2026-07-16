@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Checklist
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
@@ -88,7 +87,6 @@ private enum class Tab(
   val icon: ImageVector,
 ) {
   Home("Home", Icons.Default.Home),
-  Activity("Activity", Icons.Default.Checklist),
   Settings("Settings", Icons.Default.Settings),
 }
 
@@ -112,7 +110,6 @@ private fun StarterRoot(homeViewModel: HomeViewModel) {
   ) { padding ->
     when (selectedTab) {
       Tab.Home -> HomeScreen(homeViewModel, padding)
-      Tab.Activity -> PlaceholderScreen("Activity", padding)
       Tab.Settings -> PlaceholderScreen("Settings", padding)
     }
   }

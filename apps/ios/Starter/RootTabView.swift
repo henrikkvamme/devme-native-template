@@ -14,16 +14,6 @@ struct RootTabView: View {
 
       NavigationStack {
         PlaceholderView(
-          title: "Activity",
-          systemImage: "clock.arrow.circlepath"
-        )
-      }
-      .tabItem {
-        Label("Activity", systemImage: "clock.arrow.circlepath")
-      }
-
-      NavigationStack {
-        PlaceholderView(
           title: "Settings",
           systemImage: "gearshape.fill"
         )
