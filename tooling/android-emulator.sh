@@ -53,7 +53,16 @@ if [[ "$booted" != "1" ]]; then
   if [[ "${DEVME_TEST_EMULATOR_FOREGROUND:-0}" == "1" ]]; then
     "$emulator" -avd "$avd_name" -port "$emulator_port" >"$emulator_log" 2>&1 &
   elif [[ "$(uname -s)" == "Darwin" ]]; then
-    launchctl submit -l "devme.starter.android.$slot" -- \
+    launchctl remove "devme.starter.android.$slot" >/dev/null 2>&1 || true
+    launchctl submit \
+      -l "devme.starter.android.$slot" \
+      -o "$emulator_log" \
+      -e "$emulator_log" \
+      -- /usr/bin/env \
+      ANDROID_HOME="$sdk_root" \
+      ANDROID_SDK_ROOT="$sdk_root" \
+      ANDROID_AVD_HOME="$avd_home" \
+      HOME="$HOME" \
       "$emulator" -avd "$avd_name" -port "$emulator_port" -no-audio -no-boot-anim
   else
     setsid "$emulator" -avd "$avd_name" -port "$emulator_port" \
