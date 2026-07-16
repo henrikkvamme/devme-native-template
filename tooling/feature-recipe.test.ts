@@ -20,6 +20,9 @@ describe("native feature recipe", () => {
     expect(read("features/auth/apps/android/app/build.gradle.kts")).not.toContain(
       "android-release-preflight",
     );
+    expect(read("features/auth/infrastructure/convex/compose.yaml")).toContain(
+      'restart: "on-failure:5"',
+    );
   });
 
   it("declares Stripe as an auth-dependent, reversible feature", () => {

@@ -7,10 +7,25 @@ readonly sandbox="$(mktemp -d "${TMPDIR:-/tmp}/devme-native-recipe.XXXXXX")"
 readonly project="$sandbox/project"
 
 cleanup() {
+  local status=$?
+  local secret_file slot
+  trap - EXIT
   if [[ -f "$project/devme.toml" ]]; then
+    if [[ "$status" -ne 0 ]]; then
+      (
+        cd "$project"
+        "$devme_bin" doctor --output json >&2 || true
+      )
+    fi
     "$devme_bin" down --all >/dev/null 2>&1 || true
+    for secret_file in "$project"/.devme/convex-instance-secret-*; do
+      [[ -e "$secret_file" ]] || continue
+      slot="${secret_file##*-}"
+      DEVME_SLOT="$slot" "$project/tooling/convex.sh" down >/dev/null 2>&1 || true
+    done
   fi
   rm -rf "$sandbox"
+  exit "$status"
 }
 trap cleanup EXIT
 

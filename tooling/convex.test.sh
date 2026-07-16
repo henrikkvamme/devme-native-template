@@ -18,6 +18,9 @@ cat >"$fake_bin/docker" <<'EOF'
 set -euo pipefail
 printf '%s %s\n' "$COMPOSE_PROJECT_NAME" "$*" >>"$DOCKER_LOG"
 if [[ " $* " == *" up "* ]]; then
+  if [[ "${FAKE_DOCKER_UP_MODE:-wait}" == "fail" ]]; then
+    exit 42
+  fi
   printf '%s\n' "$$" >"$DOCKER_PID_FILE"
   trap 'exit 0' INT TERM
   while true; do sleep 1; done
@@ -54,4 +57,28 @@ if [[ "$service_status" -ne 0 && "$service_status" -ne 143 ]]; then
 fi
 
 grep -q 'compose.* down .*--remove-orphans .*--timeout 1' "$docker_log"
+
+immediate_exit_log="$temporary_directory/immediate-exit.log"
+set +e
+DOCKER_LOG="$docker_log" \
+DOCKER_PID_FILE="$docker_pid_file" \
+FAKE_DOCKER_UP_MODE=fail \
+PATH="$fake_bin:$PATH" \
+DEVME_SLOT=99 \
+CONVEX_INSTANCE_SECRET="$(printf 'a%.0s' {1..64})" \
+  "$root/tooling/convex.sh" up >"$immediate_exit_log" 2>&1
+immediate_exit_status=$?
+set -e
+if [[ "$immediate_exit_status" -ne 42 ]]; then
+  cat "$immediate_exit_log" >&2
+  printf 'Convex service did not preserve the immediate Compose exit status: %s.\n' \
+    "$immediate_exit_status" >&2
+  exit 1
+fi
+if grep -q 'unbound variable' "$immediate_exit_log"; then
+  cat "$immediate_exit_log" >&2
+  printf 'Convex service cleanup referenced an out-of-scope variable.\n' >&2
+  exit 1
+fi
+
 printf 'Convex service cleanup test passed.\n'
