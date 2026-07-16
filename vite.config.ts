@@ -3,6 +3,7 @@ import { defineConfig } from "vite-plus";
 export default defineConfig({
   fmt: {
     ignorePatterns: [
+      ".devme/**",
       "apps/**",
       "backend/confect/_generated/**",
       "backend/convex/_generated/**",
@@ -11,7 +12,12 @@ export default defineConfig({
     semi: true,
   },
   lint: {
-    ignorePatterns: ["apps/**", "backend/confect/_generated/**", "backend/convex/_generated/**"],
+    ignorePatterns: [
+      ".devme/**",
+      "apps/**",
+      "backend/confect/_generated/**",
+      "backend/convex/_generated/**",
+    ],
     options: {
       typeAware: true,
       typeCheck: true,
