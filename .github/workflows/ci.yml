@@ -40,6 +40,8 @@ jobs:
 
       - name: Pull pinned Convex services
         timeout-minutes: 10
+        env:
+          CONVEX_INSTANCE_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         run: docker compose --file infrastructure/convex/compose.yaml pull
 
       - name: Run portable Devme checks
