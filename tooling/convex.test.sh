@@ -4,6 +4,7 @@ set -euo pipefail
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 readonly temporary_directory="$(mktemp -d)"
 readonly docker_log="$temporary_directory/docker.log"
+readonly docker_pid_file="$temporary_directory/docker.pid"
 readonly fake_bin="$temporary_directory/bin"
 mkdir -p "$fake_bin"
 
@@ -17,6 +18,7 @@ cat >"$fake_bin/docker" <<'EOF'
 set -euo pipefail
 printf '%s %s\n' "$COMPOSE_PROJECT_NAME" "$*" >>"$DOCKER_LOG"
 if [[ " $* " == *" up "* ]]; then
+  printf '%s\n' "$$" >"$DOCKER_PID_FILE"
   trap 'exit 0' INT TERM
   while true; do sleep 1; done
 fi
@@ -24,6 +26,7 @@ EOF
 chmod +x "$fake_bin/docker"
 
 DOCKER_LOG="$docker_log" \
+DOCKER_PID_FILE="$docker_pid_file" \
 PATH="$fake_bin:$PATH" \
 DEVME_SLOT=99 \
 CONVEX_INSTANCE_SECRET="$(printf 'a%.0s' {1..64})" \
@@ -40,6 +43,7 @@ grep -q 'compose.* up .*--remove-orphans' "$docker_log"
 grep -Eq '^starter-[[:xdigit:]]{8}-99 compose.* up .*--remove-orphans' "$docker_log"
 
 kill -TERM "$service_pid"
+kill -TERM "$(cat "$docker_pid_file")"
 set +e
 wait "$service_pid"
 service_status=$?
