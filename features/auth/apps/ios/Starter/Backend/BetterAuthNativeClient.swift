@@ -196,6 +196,15 @@ actor BetterAuthNativeClient {
     )
   }
 
+  func deleteUser(using bearerToken: BetterAuthBearerToken) async throws {
+    _ = try await request(
+      path: "/api/auth/delete-user",
+      method: "POST",
+      json: [:],
+      bearerToken: bearerToken
+    )
+  }
+
   private func request(
     path: String,
     method: String = "GET",
@@ -348,6 +357,15 @@ final class BetterAuthProvider: AuthProvider, @unchecked Sendable {
     if let bearerToken = try await tokenStore.load() {
       try await authClient.signOut(using: bearerToken)
     }
+    try await tokenStore.clear()
+    try await signInMethod.signOut()
+  }
+
+  func deleteUser() async throws {
+    guard let bearerToken = try await tokenStore.load() else {
+      throw BetterAuthNativeError.noCachedSession
+    }
+    try await authClient.deleteUser(using: bearerToken)
     try await tokenStore.clear()
     try await signInMethod.signOut()
   }

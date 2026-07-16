@@ -37,6 +37,8 @@
   <string>$(GOOGLE_IOS_CLIENT_ID)</string>
   <key>GIDServerClientID</key>
   <string>$(GOOGLE_SERVER_CLIENT_ID)</string>
+  <key>GOOGLE_AUTH_ENABLED</key>
+  <string>$(GOOGLE_AUTH_ENABLED)</string>
   <key>LSRequiresIPhoneOS</key>
   <true/>
   <key>NSAppTransportSecurity</key>

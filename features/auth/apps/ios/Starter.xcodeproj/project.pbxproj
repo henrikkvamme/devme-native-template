@@ -517,6 +517,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_AUTH_ENABLED = YES;
 				GOOGLE_IOS_CLIENT_ID = "replace-with-google-ios-client-id";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.replace-with-google-ios-client-id";
 				GOOGLE_SERVER_CLIENT_ID = "replace-with-google-web-client-id";
@@ -549,6 +550,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = NO;
+				GOOGLE_AUTH_ENABLED = YES;
 				GOOGLE_IOS_CLIENT_ID = "replace-with-google-ios-client-id";
 				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.replace-with-google-ios-client-id";
 				GOOGLE_SERVER_CLIENT_ID = "replace-with-google-web-client-id";

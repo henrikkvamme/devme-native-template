@@ -3,6 +3,7 @@ import { convex } from "@convex-dev/better-auth/plugins";
 import type { GenericCtx } from "@convex-dev/better-auth/utils";
 import { stripe } from "@better-auth/stripe";
 import { betterAuth, type BetterAuthOptions } from "better-auth/minimal";
+import { APIError } from "better-auth/api";
 import { bearer } from "better-auth/plugins";
 import { importPKCS8, SignJWT } from "jose";
 import Stripe from "stripe";
@@ -106,6 +107,29 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     database: authComponent.adapter(ctx),
     emailAndPassword: {
       enabled: process.env.AUTH_ENABLE_TEST_PASSWORD === "true",
+    },
+    user: {
+      deleteUser: {
+        enabled: true,
+        beforeDelete: async (user) => {
+          const customerId = (user as typeof user & { stripeCustomerId?: string }).stripeCustomerId;
+          if (!customerId) return;
+          const subscriptions = await stripeClient.subscriptions.list({
+            customer: customerId,
+            status: "all",
+            limit: 100,
+          });
+          const canDelete = subscriptions.data.every((subscription) =>
+            ["canceled", "incomplete_expired"].includes(subscription.status),
+          );
+          if (!canDelete) {
+            throw APIError.from("BAD_REQUEST", {
+              code: "ACTIVE_SUBSCRIPTION",
+              message: "Cancel active subscriptions before deleting this account",
+            });
+          }
+        },
+      },
     },
     socialProviders: {
       ...(google ? { google } : {}),

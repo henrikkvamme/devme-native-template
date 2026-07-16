@@ -4,6 +4,8 @@ import SwiftUI
 struct SettingsView: View {
   @ObservedObject var viewModel: HomeViewModel
   @State private var isConfirmingSignOut = false
+  @State private var isConfirmingAccountDeletion = false
+  @State private var isReauthenticatingForDeletion = false
   @State private var appleNonce: IdentityNonce?
 
   var body: some View {
@@ -28,6 +30,21 @@ struct SettingsView: View {
       Button("Cancel", role: .cancel) {}
     } message: {
       Text("Your local session will be removed. You can sign in again at any time.")
+    }
+    .confirmationDialog(
+      "Delete account permanently?",
+      isPresented: $isConfirmingAccountDeletion,
+      titleVisibility: .visible
+    ) {
+      Button("Delete account", role: .destructive) {
+        beginAccountDeletion()
+      }
+      Button("Cancel", role: .cancel) {}
+    } message: {
+      Text("This deletes your account and sign-in data. This action cannot be undone.")
+    }
+    .sheet(isPresented: $isReauthenticatingForDeletion) {
+      deletionReauthenticationSheet
     }
   }
 
@@ -70,7 +87,13 @@ struct SettingsView: View {
         }
       }
     case let .signedIn(viewer):
-      signedInProfileCard(viewer)
+      VStack(spacing: 12) {
+        signedInProfileCard(viewer)
+
+        if let message = viewModel.authenticationErrorMessage {
+          authenticationError(message)
+        }
+      }
     }
   }
 
@@ -96,8 +119,10 @@ struct SettingsView: View {
           onCompletion: completeAppleSignIn
         )
 
-        GoogleSignInBrandButton(isAuthenticating: viewModel.isAuthenticating) {
-          Task { await signInWithGoogle() }
+        if AppConfiguration.isGoogleSignInConfigured {
+          GoogleSignInBrandButton(isAuthenticating: viewModel.isAuthenticating) {
+            Task { await signInWithGoogle() }
+          }
         }
       }
     }
@@ -135,6 +160,27 @@ struct SettingsView: View {
     }
   }
 
+  private func completeAppleDeletionSignIn(_ result: Result<ASAuthorization, Error>) {
+    defer { appleNonce = nil }
+    do {
+      let authorization = try result.get()
+      guard
+        let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
+        let appleNonce
+      else {
+        throw NativeIdentityError.missingAppleIdentityToken
+      }
+      let nativeCredential = try NativeIdentityClient.appleCredential(
+        from: credential,
+        nonce: appleNonce
+      )
+      Task { await reauthenticateAndDelete(with: nativeCredential) }
+    } catch {
+      guard !NativeIdentityClient.isCancellation(error) else { return }
+      viewModel.reportAuthenticationError(error, provider: .apple)
+    }
+  }
+
   @MainActor
   private func signInWithGoogle() async {
     do {
@@ -144,6 +190,66 @@ struct SettingsView: View {
       guard !NativeIdentityClient.isCancellation(error) else { return }
       viewModel.reportAuthenticationError(error, provider: .google)
     }
+  }
+
+  @MainActor
+  private func signInWithGoogleForDeletion() async {
+    do {
+      let credential = try await NativeIdentityClient.signInWithGoogle()
+      await reauthenticateAndDelete(with: credential)
+    } catch {
+      guard !NativeIdentityClient.isCancellation(error) else { return }
+      viewModel.reportAuthenticationError(error, provider: .google)
+    }
+  }
+
+  @MainActor
+  private func reauthenticateAndDelete(with credential: NativeIdentityCredential) async {
+    guard case let .signedIn(originalViewer) = viewModel.authenticationState else { return }
+    await viewModel.signIn(with: credential)
+    guard case let .signedIn(freshViewer) = viewModel.authenticationState else { return }
+    guard freshViewer.subject == originalViewer.subject else {
+      isReauthenticatingForDeletion = false
+      await viewModel.signOut()
+      viewModel.reportAccountDeletionIdentityMismatch()
+      return
+    }
+    isReauthenticatingForDeletion = false
+    await viewModel.deleteAccount()
+  }
+
+  private func beginAccountDeletion() {
+    if viewModel.authenticationMode == .developmentDemo {
+      Task { await viewModel.deleteAccount() }
+    } else {
+      isReauthenticatingForDeletion = true
+    }
+  }
+
+  private var deletionReauthenticationSheet: some View {
+    VStack(alignment: .leading, spacing: 20) {
+      Text("Verify your identity")
+        .font(.title2.bold())
+      Text("Sign in again before permanently deleting this account.")
+        .foregroundStyle(.secondary)
+
+      AppleSignInBrandButton(
+        isAuthenticating: viewModel.isAuthenticating,
+        onRequest: configureAppleRequest,
+        onCompletion: completeAppleDeletionSignIn
+      )
+
+      if AppConfiguration.isGoogleSignInConfigured {
+        GoogleSignInBrandButton(isAuthenticating: viewModel.isAuthenticating) {
+          Task { await signInWithGoogleForDeletion() }
+        }
+      }
+
+      Button("Cancel") { isReauthenticatingForDeletion = false }
+        .frame(maxWidth: .infinity)
+    }
+    .padding(24)
+    .presentationDetents([.height(300)])
   }
 
   private func signedInProfileCard(_ viewer: AuthenticatedViewer) -> some View {
@@ -209,6 +315,32 @@ struct SettingsView: View {
             .background(.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
           Text("Sign out")
             .font(.body.weight(.medium))
+          Spacer()
+        }
+        .padding(14)
+        .contentShape(Rectangle())
+      }
+      .buttonStyle(.plain)
+      .foregroundStyle(.red)
+      .disabled(viewModel.isAuthenticating)
+
+      Divider().padding(.leading, 58)
+
+      Button(role: .destructive) {
+        isConfirmingAccountDeletion = true
+      } label: {
+        HStack(spacing: 14) {
+          Image(systemName: "trash.fill")
+            .font(.body.weight(.semibold))
+            .frame(width: 30, height: 30)
+            .background(.red.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+          VStack(alignment: .leading, spacing: 2) {
+            Text("Delete account")
+              .font(.body.weight(.medium))
+            Text("Permanently remove your account and sign-in data")
+              .font(.caption)
+              .foregroundStyle(.secondary)
+          }
           Spacer()
         }
         .padding(14)

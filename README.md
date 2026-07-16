@@ -19,10 +19,12 @@ Add optional capabilities when needed:
 
 ```sh
 devme feature add auth
-devme feature add stripe
+devme feature add billing-stripe-external
+devme feature add release-ios
+devme feature add release-android
 ```
 
-Stripe includes Auth. Feature changes install dependencies and reload services automatically.
+External Stripe billing includes Auth. Use it only when the app and target stores permit external checkout. Feature changes install dependencies and reload services automatically.
 
 ## Run
 
@@ -32,7 +34,7 @@ devme
 
 Rename the `Starter` targets and replace the `dev.starter.app` identifiers before shipping.
 
-See [Auth and Stripe](docs/auth-and-billing.md) for provider setup.
+See [Auth and billing](docs/auth-and-billing.md) for provider setup.
 
 ## Ship
 

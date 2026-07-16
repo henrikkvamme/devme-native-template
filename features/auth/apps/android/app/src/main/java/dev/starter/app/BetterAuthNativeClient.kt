@@ -1,11 +1,30 @@
 package dev.starter.app
 
 import android.content.Context
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.NoCredentialException
+import androidx.core.content.edit
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import dev.convex.android.AuthProvider
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.json.JSONObject
 
 enum class NativeSocialProvider(val wireName: String) {
@@ -23,12 +42,23 @@ data class NativeIdentityCredential(
 value class BetterAuthBearerToken(val value: String)
 
 @JvmInline
-value class ConvexJwt(val value: String)
+value class ConvexJwt(val value: String) {
+  val subject: String
+    get() {
+      val payload = value.split('.').getOrNull(1) ?: error("Convex JWT is malformed")
+      val decoded = java.util.Base64.getUrlDecoder().decode(payload)
+      return Json.parseToJsonElement(decoded.toString(Charsets.UTF_8))
+        .jsonObject.getValue("sub").jsonPrimitive.content
+    }
+}
 
 data class BetterAuthSession(
   val bearerToken: BetterAuthBearerToken,
   val convexToken: ConvexJwt,
-)
+) {
+  val subject: String
+    get() = convexToken.subject
+}
 
 interface NativeIdentityProvider {
   suspend fun signIn(context: Context): NativeIdentityCredential
@@ -96,6 +126,15 @@ class BetterAuthNativeClient(
     )
   }
 
+  suspend fun deleteUser(bearerToken: BetterAuthBearerToken) {
+    request(
+      path = "/api/auth/delete-user",
+      method = "POST",
+      body = JSONObject(),
+      bearerToken = bearerToken,
+    )
+  }
+
   private suspend fun request(
     path: String,
     method: String = "GET",
@@ -141,6 +180,93 @@ class BetterAuthNativeClient(
   )
 }
 
+class GoogleCredentialIdentityProvider(
+  private val serverClientId: String,
+) : NativeIdentityProvider {
+  override suspend fun signIn(context: Context): NativeIdentityCredential {
+    check(serverClientId.isNotBlank()) {
+      "Set the googleWebClientId Gradle property to the Google web OAuth client ID"
+    }
+    val option = GetSignInWithGoogleOption.Builder(serverClientId).build()
+    val result = try {
+      CredentialManager.create(context).getCredential(
+        context = context,
+        request = GetCredentialRequest.Builder().addCredentialOption(option).build(),
+      )
+    } catch (_: NoCredentialException) {
+      error("No Google account is available for sign-in")
+    }
+    val credential = result.credential
+    check(
+      credential is CustomCredential &&
+        credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL,
+    ) { "Google returned an unsupported credential type" }
+    return NativeIdentityCredential(
+      provider = NativeSocialProvider.Google,
+      idToken = GoogleIdTokenCredential.createFrom(credential.data).idToken,
+    )
+  }
+
+  override suspend fun signOut(context: Context) {
+    CredentialManager.create(context).clearCredentialState(ClearCredentialStateRequest())
+  }
+}
+
+class AndroidKeystoreBearerTokenStore(context: Context) : BetterAuthBearerTokenStore {
+  private val preferences = context.getSharedPreferences("better-auth-session", Context.MODE_PRIVATE)
+
+  override suspend fun load(): BetterAuthBearerToken? {
+    val encoded = preferences.getString(TOKEN_KEY, null) ?: return null
+    val payload = Base64.decode(encoded, Base64.NO_WRAP)
+    check(payload.size > IV_LENGTH) { "Stored authentication session is invalid" }
+    val cipher = Cipher.getInstance(TRANSFORMATION)
+    cipher.init(
+      Cipher.DECRYPT_MODE,
+      encryptionKey(),
+      GCMParameterSpec(128, payload.copyOfRange(0, IV_LENGTH)),
+    )
+    val plaintext = cipher.doFinal(payload.copyOfRange(IV_LENGTH, payload.size))
+    return BetterAuthBearerToken(plaintext.toString(Charsets.UTF_8))
+  }
+
+  override suspend fun save(token: BetterAuthBearerToken) {
+    val cipher = Cipher.getInstance(TRANSFORMATION)
+    cipher.init(Cipher.ENCRYPT_MODE, encryptionKey())
+    val encrypted = cipher.doFinal(token.value.toByteArray(Charsets.UTF_8))
+    preferences.edit {
+      putString(TOKEN_KEY, Base64.encodeToString(cipher.iv + encrypted, Base64.NO_WRAP))
+    }
+  }
+
+  override suspend fun clear() {
+    preferences.edit { remove(TOKEN_KEY) }
+  }
+
+  private fun encryptionKey(): SecretKey {
+    val keyStore = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+    (keyStore.getKey(KEY_ALIAS, null) as? SecretKey)?.let { return it }
+    return KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore").run {
+      init(
+        KeyGenParameterSpec.Builder(
+          KEY_ALIAS,
+          KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+        )
+          .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+          .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+          .build(),
+      )
+      generateKey()
+    }
+  }
+
+  private companion object {
+    const val KEY_ALIAS = "starter-better-auth-bearer"
+    const val TOKEN_KEY = "encrypted-bearer"
+    const val TRANSFORMATION = "AES/GCM/NoPadding"
+    const val IV_LENGTH = 12
+  }
+}
+
 class BetterAuthConvexProvider(
   private val nativeIdentity: NativeIdentityProvider,
   private val authClient: BetterAuthNativeClient,
@@ -175,6 +301,18 @@ class BetterAuthConvexProvider(
     tokenStore.clear()
     nativeIdentity.signOut(context)
     null
+  }
+
+  suspend fun reauthenticate(context: Context): BetterAuthSession {
+    val freshSession = authClient.signIn(nativeIdentity.signIn(context))
+    tokenStore.save(freshSession.bearerToken)
+    return freshSession
+  }
+
+  suspend fun deleteUser(context: Context, session: BetterAuthSession) {
+    authClient.deleteUser(session.bearerToken)
+    tokenStore.clear()
+    nativeIdentity.signOut(context)
   }
 
   override fun extractIdToken(authResult: BetterAuthSession): String =
