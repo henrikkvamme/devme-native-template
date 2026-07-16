@@ -13,6 +13,9 @@ describe("native feature recipe", () => {
       "@better-auth/stripe",
     );
     expect(read("features/auth/backend/devme.toml")).not.toContain("stripe-webhooks");
+    expect(read("features/auth/contracts/function-spec.json")).not.toContain(
+      "subscriptionForDiagnostics",
+    );
     expect(read("features/auth/apps/ios/Starter/Info.plist")).not.toContain("billing");
     expect(read("features/auth/apps/android/app/build.gradle.kts")).toContain(
       "ANDROID_UPLOAD_KEYSTORE",
@@ -54,6 +57,9 @@ describe("native feature recipe", () => {
     );
     expect(read("features/billing-stripe-external/tooling/stripe-webhooks.sh")).toContain(
       "starter-$workspace_key-$slot-backend-1",
+    );
+    expect(read("features/billing-stripe-external/contracts/function-spec.json")).toContain(
+      "subscriptionForDiagnostics",
     );
   });
 
