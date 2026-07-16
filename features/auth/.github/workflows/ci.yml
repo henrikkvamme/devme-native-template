@@ -1,0 +1,34 @@
+name: Verify
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Install Bun
+        uses: oven-sh/setup-bun@735343b667d3e6f658f44d0eca948eb6282f2b76 # v2
+        with:
+          bun-version: 1.3.13
+      - name: Build pinned Devme
+        env:
+          DEVME_REVISION: b14b342915841bdb4ebdc380ea81d715b630f107
+        run: |
+          git clone --filter=blob:none https://github.com/devme-sh/devme.git "$RUNNER_TEMP/devme"
+          git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
+          cargo build --release --locked --workspace --bins --manifest-path "$RUNNER_TEMP/devme/Cargo.toml"
+          echo "$RUNNER_TEMP/devme/target/release" >> "$GITHUB_PATH"
+      - name: Verify portable core
+        run: devme run ci-core --output toon

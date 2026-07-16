@@ -25,6 +25,9 @@ describe("native feature recipe", () => {
     expect(read("features/auth/infrastructure/convex/compose.yaml")).toContain(
       'restart: "on-failure:5"',
     );
+    expect(read("features/auth/.github/workflows/ci.yml")).toContain(
+      "b14b342915841bdb4ebdc380ea81d715b630f107",
+    );
   });
 
   it("declares external Stripe billing as an auth-dependent, reversible feature", () => {
