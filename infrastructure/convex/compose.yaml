@@ -19,6 +19,7 @@ services:
 
   backend:
     image: ghcr.io/get-convex/convex-backend:latest@sha256:104b8bc70e29b31fa4a57551596090bfc9eedc3d1f27fd4b8cd8d0e782b9b070
+    restart: "on-failure:5"
     depends_on:
       postgres:
         condition: service_healthy

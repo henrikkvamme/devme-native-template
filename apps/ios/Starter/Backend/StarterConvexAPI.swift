@@ -32,8 +32,16 @@ final class LiveStarterConvexAPI: StarterBackend {
   }
 
   func bootstrapEvents() -> AnyPublisher<[BootstrapEvent], Error> {
-    client
-      .subscribe(to: Function.bootstrapList, yielding: [BootstrapEvent].self)
+    Self.adaptSubscription(
+      client.subscribe(to: Function.bootstrapList, yielding: [BootstrapEvent].self)
+    )
+  }
+
+  static func adaptSubscription<Output, Failure: Error>(
+    _ publisher: AnyPublisher<Output, Failure>
+  ) -> AnyPublisher<Output, Error> {
+    publisher
+      .receive(on: DispatchQueue.main)
       .mapError { $0 as Error }
       .eraseToAnyPublisher()
   }
