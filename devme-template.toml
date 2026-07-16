@@ -1,6 +1,6 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.5"
+version = "2026.7.16.6"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
@@ -21,7 +21,7 @@ remove_external_steps = [
 ]
 
 [features.stripe]
-version = "1.0.0"
+version = "1.0.1"
 path = "features/stripe"
 dependencies = ["auth"]
 external_steps = [

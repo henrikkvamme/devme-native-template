@@ -24,5 +24,8 @@ describe("native feature recipe", () => {
     expect(manifest.match(/remove_external_steps/g)).toHaveLength(2);
     expect(read("features/stripe/backend/package.json")).toContain("@better-auth/stripe");
     expect(read("features/stripe/tooling/stripe-webhooks.sh")).toContain("stripe listen");
+    expect(read("features/stripe/tooling/stripe-webhooks.sh")).toContain(
+      "starter-$workspace_key-$slot-backend-1",
+    );
   });
 });

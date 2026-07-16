@@ -2,13 +2,14 @@
 set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+readonly workspace_key="$(printf '%s' "$root" | openssl dgst -sha256 -r | cut -c1-8)"
 source "$root/tooling/devme-ports.sh"
 
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="${CONVEX_PORT:-$(devme_convex_port "$slot")}"
 readonly site_port="${CONVEX_SITE_PORT:-$(devme_convex_site_port "$slot")}"
 readonly config_file="${AUTH_CONFIG_FILE:-$root/.env.auth.local}"
-readonly backend_container="starter-$slot-backend-1"
+readonly backend_container="starter-$workspace_key-$slot-backend-1"
 readonly webhook_events="checkout.session.completed,customer.subscription.created,customer.subscription.updated,customer.subscription.deleted"
 readonly mode="${1:-listen}"
 
