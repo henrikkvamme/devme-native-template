@@ -10,6 +10,7 @@ depends_on = ["root::docker"]
 
 [task.codegen]
 kind = "utility"
+visibility = "internal"
 description = "Generate the Confect and Convex boundary code"
 cmd = "bun run codegen"
 steps = ["root::dependencies"]
@@ -17,6 +18,7 @@ timeout = 120
 
 [task.deploy]
 kind = "utility"
+visibility = "internal"
 description = "Publish the current Confect functions to local Convex"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh deploy"
 steps = ["root::dependencies"]
@@ -25,6 +27,7 @@ timeout = 180
 
 [task.test]
 kind = "check"
+visibility = "internal"
 description = "Run backend unit and contract tests"
 cmd = "bun run test backend"
 cwd = ".."
@@ -33,6 +36,7 @@ timeout = 180
 
 [task.live-smoke]
 kind = "check"
+visibility = "internal"
 description = "Deploy and exercise the backend through its public wire contract"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh live-smoke"
 depends_on = ["deploy"]
@@ -42,6 +46,7 @@ timeout = 180
 
 [task.auth-live-smoke]
 kind = "check"
+visibility = "internal"
 description = "Verify Better Auth and Convex identity integration"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-live-smoke"
 depends_on = ["deploy"]
@@ -68,15 +73,18 @@ timeout = 180
 
 [task.contract-export]
 kind = "utility"
+visibility = "internal"
 description = "Export the deployed Convex function contract for native clients"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh function-spec"
 depends_on = ["deploy"]
 steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
+artifacts = ["contracts/function-spec.json"]
 
 [task.contract-check]
 kind = "check"
+visibility = "internal"
 description = "Fail when the deployed Convex contract differs from the reviewed manifest"
 cmd = "DEVME_SLOT={slot} ../tooling/convex.sh function-spec-check"
 depends_on = ["deploy"]
@@ -86,6 +94,7 @@ timeout = 180
 
 [task.launch]
 kind = "launch"
+visibility = "internal"
 description = "Start Convex and deploy the authenticated backend"
 cmd = "true"
 depends_on = ["deploy"]

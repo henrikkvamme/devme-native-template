@@ -1,0 +1,163 @@
+{
+  "url": "",
+  "functions": [
+    {
+      "functionType": "HttpAction",
+      "method": "GET",
+      "path": "/.well-known/openid-configuration"
+    },
+    {
+      "functionType": "HttpAction",
+      "method": "GET",
+      "path": "/api/auth/*"
+    },
+    {
+      "functionType": "HttpAction",
+      "method": "POST",
+      "path": "/api/auth/*"
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:current",
+      "returns": null,
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Action",
+      "identifier": "auth.js:getLatestJwks",
+      "returns": null,
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "referenceId": {
+            "fieldType": {
+              "type": "string"
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Query",
+      "identifier": "auth.js:subscriptionForDiagnostics",
+      "returns": null,
+      "visibility": {
+        "kind": "internal"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {}
+      },
+      "functionType": "Query",
+      "identifier": "bootstrap.js:list",
+      "returns": {
+        "type": "array",
+        "value": {
+          "type": "object",
+          "value": {
+            "_creationTime": {
+              "fieldType": {
+                "type": "number"
+              },
+              "optional": false
+            },
+            "_id": {
+              "fieldType": {
+                "tableName": "bootstrapEvents",
+                "type": "id"
+              },
+              "optional": false
+            },
+            "authenticated": {
+              "fieldType": {
+                "type": "boolean"
+              },
+              "optional": true
+            },
+            "client": {
+              "fieldType": {
+                "type": "union",
+                "value": [
+                  {
+                    "type": "literal",
+                    "value": "android"
+                  },
+                  {
+                    "type": "literal",
+                    "value": "ios"
+                  },
+                  {
+                    "type": "literal",
+                    "value": "test"
+                  }
+                ]
+              },
+              "optional": false
+            },
+            "message": {
+              "fieldType": {
+                "type": "string"
+              },
+              "optional": false
+            }
+          }
+        }
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    },
+    {
+      "args": {
+        "type": "object",
+        "value": {
+          "client": {
+            "fieldType": {
+              "type": "union",
+              "value": [
+                {
+                  "type": "literal",
+                  "value": "android"
+                },
+                {
+                  "type": "literal",
+                  "value": "ios"
+                },
+                {
+                  "type": "literal",
+                  "value": "test"
+                }
+              ]
+            },
+            "optional": false
+          }
+        }
+      },
+      "functionType": "Mutation",
+      "identifier": "bootstrap.js:ping",
+      "returns": {
+        "tableName": "bootstrapEvents",
+        "type": "id"
+      },
+      "visibility": {
+        "kind": "public"
+      }
+    }
+  ]
+}

@@ -107,5 +107,6 @@ open -a Simulator >/dev/null 2>&1 || true
 printf 'result:\n'
 printf '  status: launched\n'
 printf '  simulator: %s\n' "$(toon_quote "$simulator_name")"
+printf '  simulator_udid: %s\n' "$(toon_quote "$simulator_udid")"
 printf '  bundle_id: %s\n' "$(toon_quote "$bundle_id")"
 printf '  backend_url: %s\n' "$(toon_quote "http://127.0.0.1:$convex_port")"

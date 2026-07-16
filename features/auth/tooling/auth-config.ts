@@ -189,11 +189,22 @@ const parseFlag = (arguments_: string[], name: string) => {
 const printHelp = () => {
   console.log("bin: tooling/auth-config.ts");
   console.log('description: "Validate and inspect native authentication configuration"');
-  console.log("commands[4]{name,flags}:");
+  console.log("commands[5]{name,flags}:");
   console.log('  prepare,"--input <path> --output <path>"');
   console.log('  applied,"--input <path>"');
   console.log('  ios-xcconfig,"--input <path> --output <path>"');
+  console.log('  android-client-id,"--input <path>"');
   console.log('  doctor,"--strict"');
+};
+
+const runAndroidClientId = async (arguments_: string[]) => {
+  const input = parseFlag(arguments_, "--input");
+  if (arguments_.length > 0) throw new Error(`Unknown argument: ${arguments_[0]}`);
+  if (!input) throw new Error("android-client-id requires --input");
+  const configuration = await prepareConfiguration(await Bun.file(input).text(), process.cwd());
+  const clientId = configuration.GOOGLE_WEB_CLIENT_ID;
+  if (!clientId) throw new Error("Android Google auth requires GOOGLE_WEB_CLIENT_ID");
+  console.log(clientId);
 };
 
 const runIOSXCConfig = async (arguments_: string[]) => {
@@ -286,6 +297,7 @@ const main = async () => {
   if (command === "prepare") return runPrepare(arguments_);
   if (command === "applied") return runApplied(arguments_);
   if (command === "ios-xcconfig") return runIOSXCConfig(arguments_);
+  if (command === "android-client-id") return runAndroidClientId(arguments_);
   if (command === "doctor") return runDoctor(arguments_);
   throw new Error(command ? `Unknown command: ${command}` : "A command is required");
 };

@@ -10,6 +10,9 @@ val debugConvexUrl = providers
 val debugAuthSiteUrl = providers
   .gradleProperty("authSiteUrl")
   .orElse("http://10.0.2.2:3211")
+val googleWebClientId = providers
+  .gradleProperty("googleWebClientId")
+  .orElse("")
 val releaseConvexUrl = providers
   .gradleProperty("releaseConvexUrl")
   .orElse("https://replace-before-release.invalid")
@@ -53,6 +56,12 @@ val validateReleaseConfiguration by tasks.registering(Exec::class) {
   environment("RELEASE_APPLICATION_ID", releaseApplicationId)
   environment("RELEASE_CONVEX_URL", releaseConvexUrl.get())
   environment("RELEASE_AUTH_SITE_URL", releaseAuthSiteUrl.get())
+  environment("GOOGLE_WEB_CLIENT_ID", googleWebClientId.get())
+  environment("ANDROID_ACCOUNT_DELETION_URL", System.getenv("ANDROID_ACCOUNT_DELETION_URL") ?: "")
+  environment(
+    "AUTH_DELETION_LIFECYCLE_VERIFIED",
+    System.getenv("AUTH_DELETION_LIFECYCLE_VERIFIED") ?: "",
+  )
   commandLine("bash", rootProject.file("../../tooling/android-release-preflight.sh"))
 }
 
@@ -104,6 +113,7 @@ android {
         "AUTH_SITE_URL",
         "\"${debugAuthSiteUrl.get()}\"",
       )
+      buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.get()}\"")
     }
     release {
       if (releaseSigningConfigured) {
@@ -119,6 +129,7 @@ android {
         "AUTH_SITE_URL",
         "\"${releaseAuthSiteUrl.get()}\"",
       )
+      buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.get()}\"")
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(
@@ -154,6 +165,9 @@ dependencies {
 
   implementation(composeBom)
   implementation("androidx.activity:activity-compose:1.13.0")
+  implementation("androidx.credentials:credentials:1.6.0")
+  implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+  implementation("androidx.fragment:fragment:1.8.9")
   implementation("androidx.compose.material:material-icons-extended")
   implementation("androidx.compose.material3:material3")
   implementation("androidx.compose.ui:ui")
@@ -163,6 +177,7 @@ dependencies {
   implementation("dev.convex:android-convexmobile:0.8.0@aar") {
     isTransitive = true
   }
+  implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
   debugImplementation(composeBom)

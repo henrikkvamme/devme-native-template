@@ -1,18 +1,18 @@
 schema_version = 1
 name = "native"
-version = "2026.7.16.13"
+version = "2026.7.16.21"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
-revision = "1d2dbf3f14949941212512f2a4bdd85eb4ea26b1"
+revision = "c00e0e34f5933c1cb6f9929cce6a527ef34098a0"
 subdir = "."
 
 [features.auth]
-version = "1.0.3"
+version = "1.0.9"
 path = "features/auth"
 external_steps = [
   "Choose final iOS and Android application identifiers before creating provider credentials.",
-  "Follow the current Better Auth, Apple, and Google setup links in docs/ios-auth-interface.md.",
+  "Follow the current Better Auth, Apple, Google, and Android Credential Manager links in docs/auth.md.",
   "Copy .env.auth.example to .env.auth.local, provide at least one complete provider, then run devme run backend::auth-configure --output toon.",
 ]
 remove_external_steps = [
@@ -20,11 +20,12 @@ remove_external_steps = [
   "Remove unused Apple and Google application registrations only after confirming no deployed app depends on them.",
 ]
 
-[features.stripe]
-version = "1.0.3"
-path = "features/stripe"
+[features.billing-stripe-external]
+version = "1.0.5"
+path = "features/billing-stripe-external"
 dependencies = ["auth"]
 external_steps = [
+  "Confirm the app is eligible to use external Stripe billing in every target store and region before exposing checkout.",
   "Create or select a Stripe sandbox product and recurring price.",
   "Add STRIPE_SECRET_KEY and STRIPE_PRICE_ID to .env.auth.local, then rerun devme run backend::auth-configure --output toon.",
   "Keep backend::stripe-webhooks healthy while testing sandbox checkout.",
@@ -32,4 +33,26 @@ external_steps = [
 remove_external_steps = [
   "Cancel test subscriptions and remove Stripe webhook endpoints that are no longer needed.",
   "Delete Stripe secrets from local and deployed environments after the final dependent deployment is removed.",
+]
+
+[features.release-ios]
+version = "1.0.2"
+path = "features/release-ios"
+external_steps = [
+  "Follow docs/ios-xcode-cloud.md to create the Xcode Cloud verification and internal TestFlight workflows.",
+  "Protect ios-beta-* tags and keep signing, App Store Connect, privacy, and export-compliance state current.",
+]
+remove_external_steps = [
+  "Delete or disable the Xcode Cloud workflows if this repository should no longer distribute iOS builds.",
+]
+
+[features.release-android]
+version = "1.0.2"
+path = "features/release-android"
+external_steps = [
+  "Follow docs/android-google-play.md to bootstrap Play App Signing, the internal track, and the protected GitHub environment.",
+  "Protect android-beta-* tags and keep the upload key and least-privilege Play service account backed up.",
+]
+remove_external_steps = [
+  "Delete or disable the GitHub environment and workflow credentials if this repository should no longer distribute Android builds.",
 ]

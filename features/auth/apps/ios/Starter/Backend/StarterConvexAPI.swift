@@ -78,6 +78,7 @@ protocol StarterBackend {
   func restoreSession() async throws -> AuthenticatedViewer?
   func signIn(with credential: NativeIdentityCredential?) async throws -> AuthenticatedViewer
   func signOut() async
+  func deleteAccount() async throws
 }
 
 @MainActor
@@ -155,6 +156,12 @@ final class LiveStarterConvexAPI: StarterBackend {
   }
 
   func signOut() async {
+    await client.logout()
+    NativeIdentityClient.signOutFromGoogle()
+  }
+
+  func deleteAccount() async throws {
+    try await authProvider.deleteUser()
     await client.logout()
     NativeIdentityClient.signOutFromGoogle()
   }

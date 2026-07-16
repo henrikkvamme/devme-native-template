@@ -39,13 +39,15 @@ trust = "manual"
 
 [task.tooling-test]
 kind = "check"
+visibility = "internal"
 description = "Verify worktree ports and native device helpers"
-cmd = "devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh"
+cmd = "devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh && bash tooling/android-emulator.test.sh"
 steps = ["dependencies"]
 timeout = 180
 
 [task.typescript-check]
 kind = "check"
+visibility = "internal"
 description = "Format-check, lint, and type-check TypeScript"
 cmd = "bun run check"
 steps = ["dependencies"]
@@ -53,6 +55,7 @@ timeout = 180
 
 [task.ci-core]
 kind = "check"
+visibility = "internal"
 description = "Run portable tooling and backend CI checks"
 depends_on = [
   "tooling-test",

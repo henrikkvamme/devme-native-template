@@ -111,6 +111,11 @@ final class HomeViewModel: ObservableObject {
     authenticationErrorMessage = nil
   }
 
+  func reportAccountDeletionIdentityMismatch() {
+    authenticationErrorMessage =
+      "Sign in with the same account that you are trying to delete."
+  }
+
   func signOut() async {
     guard !isAuthenticating else { return }
     isAuthenticating = true
@@ -118,5 +123,19 @@ final class HomeViewModel: ObservableObject {
     await backend.signOut()
     authenticationState = .signedOut
     authenticationErrorMessage = nil
+  }
+
+  func deleteAccount() async {
+    guard !isAuthenticating else { return }
+    isAuthenticating = true
+    authenticationErrorMessage = nil
+    defer { isAuthenticating = false }
+
+    do {
+      try await backend.deleteAccount()
+      authenticationState = .signedOut
+    } catch {
+      authenticationErrorMessage = "Your account could not be deleted. Please try again."
+    }
   }
 }

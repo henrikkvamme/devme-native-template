@@ -22,4 +22,8 @@ enum AppConfiguration {
 
     return url
   }
+
+  static var isGoogleSignInConfigured: Bool {
+    Bundle.main.object(forInfoDictionaryKey: "GOOGLE_AUTH_ENABLED") as? String == "YES"
+  }
 }

@@ -95,6 +95,7 @@ export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
     emailAndPassword: {
       enabled: process.env.AUTH_ENABLE_TEST_PASSWORD === "true",
     },
+    user: { deleteUser: { enabled: true } },
     socialProviders: {
       ...(google ? { google } : {}),
       ...(apple ? { apple } : {}),

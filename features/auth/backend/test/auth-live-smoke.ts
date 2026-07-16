@@ -79,10 +79,28 @@ if (viewer?.email !== credentials.email || viewer.image !== profileImage) {
   throw new Error("Convex did not resolve the authenticated Better Auth profile");
 }
 
+const deleteResponse = await fetch(`${authSiteURL}/api/auth/delete-user`, {
+  method: "POST",
+  headers: {
+    authorization: `Bearer ${bearerToken}`,
+    "content-type": "application/json",
+  },
+  body: "{}",
+});
+await expectStatus(deleteResponse, 200);
+const deletedSessionResponse = await fetch(`${authSiteURL}/api/auth/get-session`, {
+  headers: { authorization: `Bearer ${bearerToken}` },
+});
+await expectStatus(deletedSessionResponse, 200);
+if ((await deletedSessionResponse.text()).trim() !== "null") {
+  throw new Error("Better Auth kept a session after account deletion");
+}
+
 console.log(
   JSON.stringify({
     auth: "passed",
     convexIdentity: "passed",
     profileImage: "passed",
+    accountDeletion: "passed",
   }),
 );

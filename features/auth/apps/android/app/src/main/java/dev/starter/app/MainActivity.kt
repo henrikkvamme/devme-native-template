@@ -26,23 +26,31 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
   private val requestLocalNetworkPermission = registerForActivityResult(
@@ -69,14 +77,17 @@ class MainActivity : ComponentActivity() {
       PackageManager.PERMISSION_GRANTED
 
   private fun showContent() {
-    val backend = (application as StarterApplication).backend
+    val application = application as StarterApplication
+    val backend = application.backend
+    val authentication = application.authentication
 
     setContent {
       MaterialTheme {
         val homeViewModel: HomeViewModel = viewModel(
           factory = HomeViewModel.Factory(backend),
         )
-        StarterRoot(homeViewModel)
+        LaunchedEffect(authentication) { authentication.restore() }
+        StarterRoot(homeViewModel, authentication)
       }
     }
   }
@@ -91,7 +102,10 @@ private enum class Tab(
 }
 
 @Composable
-private fun StarterRoot(homeViewModel: HomeViewModel) {
+private fun StarterRoot(
+  homeViewModel: HomeViewModel,
+  authentication: AuthenticationController,
+) {
   var selectedTab by remember { mutableStateOf(Tab.Home) }
 
   Scaffold(
@@ -110,7 +124,7 @@ private fun StarterRoot(homeViewModel: HomeViewModel) {
   ) { padding ->
     when (selectedTab) {
       Tab.Home -> HomeScreen(homeViewModel, padding)
-      Tab.Settings -> PlaceholderScreen("Settings", padding)
+      Tab.Settings -> SettingsScreen(authentication, padding)
     }
   }
 }
@@ -208,17 +222,103 @@ private fun ConnectionCard(
 }
 
 @Composable
-private fun PlaceholderScreen(
-  title: String,
+private fun SettingsScreen(
+  authentication: AuthenticationController,
   padding: PaddingValues,
 ) {
-  Column(
+  val state by authentication.state.collectAsStateWithLifecycle()
+  val context = LocalContext.current
+  val scope = rememberCoroutineScope()
+  var confirmDeletion by remember { mutableStateOf(false) }
+
+  if (confirmDeletion) {
+    AlertDialog(
+      onDismissRequest = { confirmDeletion = false },
+      title = { Text("Delete account permanently?") },
+      text = { Text("This deletes your account and sign-in data. This action cannot be undone.") },
+      confirmButton = {
+        TextButton(
+          onClick = {
+            confirmDeletion = false
+            scope.launch { authentication.deleteAccount(context) }
+          },
+        ) { Text("Delete account", color = MaterialTheme.colorScheme.error) }
+      },
+      dismissButton = {
+        TextButton(onClick = { confirmDeletion = false }) { Text("Cancel") }
+      },
+    )
+  }
+
+  LazyColumn(
     modifier = Modifier
       .fillMaxSize()
-      .padding(padding)
-      .padding(24.dp),
+      .padding(padding),
+    contentPadding = PaddingValues(24.dp),
+    verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    Text(title, style = MaterialTheme.typography.displaySmall)
-    Text("Replace this tab with your native feature.")
+    item { Text("Settings", style = MaterialTheme.typography.displaySmall) }
+    item {
+      Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+          modifier = Modifier.padding(20.dp),
+          verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+          when (val current = state) {
+            AuthenticationUiState.Restoring -> {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+              ) {
+                CircularProgressIndicator()
+                Text("Restoring secure session")
+              }
+            }
+            AuthenticationUiState.SignedOut -> {
+              Text("Your account", style = MaterialTheme.typography.titleLarge)
+              Text(
+                "Sign in to keep your data connected across devices.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              OutlinedButton(
+                onClick = { scope.launch { authentication.signIn(context) } },
+                enabled = BuildConfig.GOOGLE_WEB_CLIENT_ID.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
+              ) { Text("Sign in with Google") }
+              if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isBlank()) {
+                Text(
+                  "Set the googleWebClientId Gradle property to enable Google sign-in.",
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  style = MaterialTheme.typography.bodySmall,
+                )
+              }
+            }
+            AuthenticationUiState.SignedIn -> {
+              Text("Signed in", style = MaterialTheme.typography.titleLarge)
+              Text(
+                "Your Better Auth session is secured by Android Keystore.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              OutlinedButton(
+                onClick = { scope.launch { authentication.signOut(context) } },
+                modifier = Modifier.fillMaxWidth(),
+              ) { Text("Sign out") }
+              TextButton(
+                onClick = { confirmDeletion = true },
+                modifier = Modifier.fillMaxWidth(),
+              ) { Text("Delete account", color = MaterialTheme.colorScheme.error) }
+            }
+            is AuthenticationUiState.Failed -> {
+              Text("Account action failed", style = MaterialTheme.typography.titleLarge)
+              Text(current.message, color = MaterialTheme.colorScheme.error)
+              OutlinedButton(
+                onClick = { scope.launch { authentication.signIn(context) } },
+                modifier = Modifier.fillMaxWidth(),
+              ) { Text("Try again") }
+            }
+          }
+        }
+      }
+    }
   }
 }

@@ -10,12 +10,39 @@ val debugConvexUrl = providers
 val debugAuthSiteUrl = providers
   .gradleProperty("authSiteUrl")
   .orElse("http://10.0.2.2:3211")
+val googleWebClientId = providers
+  .gradleProperty("googleWebClientId")
+  .orElse("")
 val releaseConvexUrl = providers
   .gradleProperty("releaseConvexUrl")
   .orElse("https://replace-before-release.invalid")
 val releaseAuthSiteUrl = providers
   .gradleProperty("releaseAuthSiteUrl")
   .orElse("https://replace-before-release.invalid")
+val releaseVersionCode = providers
+  .gradleProperty("versionCode")
+  .map(String::toInt)
+  .orElse(1)
+val releaseVersionName = providers
+  .gradleProperty("versionName")
+  .orElse("1.0")
+val releaseApplicationId = "dev.starter.app"
+
+val uploadKeystorePath = System.getenv("ANDROID_UPLOAD_KEYSTORE_PATH")
+val uploadKeystorePassword = System.getenv("ANDROID_UPLOAD_KEYSTORE_PASSWORD")
+val uploadKeyAlias = System.getenv("ANDROID_UPLOAD_KEY_ALIAS")
+val uploadKeyPassword = System.getenv("ANDROID_UPLOAD_KEY_PASSWORD")
+val releaseSigningValues = listOf(
+  uploadKeystorePath,
+  uploadKeystorePassword,
+  uploadKeyAlias,
+  uploadKeyPassword,
+)
+val releaseSigningConfigured = releaseSigningValues.all { !it.isNullOrBlank() }
+
+require(releaseSigningValues.none { !it.isNullOrBlank() } || releaseSigningConfigured) {
+  "Android release signing is partially configured. Set all ANDROID_UPLOAD_KEYSTORE_* variables."
+}
 
 configurations.configureEach {
   // Convex 0.8.0 pins JNA 5.14.0, whose native binary cannot load on 16 KB
@@ -23,16 +50,48 @@ configurations.configureEach {
   resolutionStrategy.force("net.java.dev.jna:jna:5.19.1")
 }
 
+val validateReleaseConfiguration by tasks.registering(Exec::class) {
+  group = "verification"
+  description = "Fail when Android release signing or endpoints are not configured"
+  environment("RELEASE_APPLICATION_ID", releaseApplicationId)
+  environment("RELEASE_CONVEX_URL", releaseConvexUrl.get())
+  environment("RELEASE_AUTH_SITE_URL", releaseAuthSiteUrl.get())
+  environment("GOOGLE_WEB_CLIENT_ID", googleWebClientId.get())
+  environment("ANDROID_ACCOUNT_DELETION_URL", System.getenv("ANDROID_ACCOUNT_DELETION_URL") ?: "")
+  environment(
+    "AUTH_DELETION_LIFECYCLE_VERIFIED",
+    System.getenv("AUTH_DELETION_LIFECYCLE_VERIFIED") ?: "",
+  )
+  commandLine("bash", rootProject.file("../../tooling/android-release-preflight.sh"))
+}
+
+tasks.configureEach {
+  if (name.contains("release", ignoreCase = true) && name != "validateReleaseConfiguration") {
+    dependsOn(validateReleaseConfiguration)
+  }
+}
+
 android {
   namespace = "dev.starter.app"
   compileSdk = 37
 
+  signingConfigs {
+    if (releaseSigningConfigured) {
+      create("release") {
+        storeFile = file(uploadKeystorePath!!)
+        storePassword = uploadKeystorePassword
+        keyAlias = uploadKeyAlias
+        keyPassword = uploadKeyPassword
+      }
+    }
+  }
+
   defaultConfig {
-    applicationId = "dev.starter.app"
+    applicationId = releaseApplicationId
     minSdk = 26
     targetSdk = 37
-    versionCode = 1
-    versionName = "1.0"
+    versionCode = releaseVersionCode.get()
+    versionName = releaseVersionName.get()
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
@@ -54,8 +113,12 @@ android {
         "AUTH_SITE_URL",
         "\"${debugAuthSiteUrl.get()}\"",
       )
+      buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.get()}\"")
     }
     release {
+      if (releaseSigningConfigured) {
+        signingConfig = signingConfigs.getByName("release")
+      }
       buildConfigField(
         "String",
         "CONVEX_URL",
@@ -66,6 +129,7 @@ android {
         "AUTH_SITE_URL",
         "\"${releaseAuthSiteUrl.get()}\"",
       )
+      buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"${googleWebClientId.get()}\"")
       isMinifyEnabled = true
       isShrinkResources = true
       proguardFiles(
@@ -101,6 +165,9 @@ dependencies {
 
   implementation(composeBom)
   implementation("androidx.activity:activity-compose:1.13.0")
+  implementation("androidx.credentials:credentials:1.6.0")
+  implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
+  implementation("androidx.fragment:fragment:1.8.9")
   implementation("androidx.compose.material:material-icons-extended")
   implementation("androidx.compose.material3:material3")
   implementation("androidx.compose.ui:ui")
@@ -110,6 +177,7 @@ dependencies {
   implementation("dev.convex:android-convexmobile:0.8.0@aar") {
     isTransitive = true
   }
+  implementation("com.google.android.libraries.identity.googleid:googleid:1.2.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
   debugImplementation(composeBom)
