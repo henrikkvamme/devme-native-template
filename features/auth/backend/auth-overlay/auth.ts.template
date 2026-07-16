@@ -85,11 +85,12 @@ export const authComponent = createClient<DataModel, typeof schema>(components.b
 });
 
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => {
+  const baseURL = authBaseURL();
   const google = googleProvider();
   const apple = appleProvider();
   return {
     appName: trimmedNonEmpty(process.env.AUTH_APP_NAME) ?? "Starter",
-    baseURL: authBaseURL(),
+    ...(baseURL ? { baseURL } : {}),
     secret: process.env.BETTER_AUTH_SECRET,
     database: authComponent.adapter(ctx),
     emailAndPassword: {
