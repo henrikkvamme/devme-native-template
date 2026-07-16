@@ -94,9 +94,24 @@ set_convex_env() {
   return 1
 }
 
+run_compose_service() {
+  local compose_pid
+  compose up --remove-orphans &
+  compose_pid=$!
+
+  cleanup_compose_service() {
+    trap - EXIT INT TERM
+    kill "$compose_pid" 2>/dev/null || true
+    wait "$compose_pid" 2>/dev/null || true
+    compose down --remove-orphans
+  }
+  trap cleanup_compose_service EXIT INT TERM
+  wait "$compose_pid"
+}
+
 case "${1:-}" in
   up)
-    compose up --remove-orphans
+    run_compose_service
     ;;
   down)
     compose down --remove-orphans

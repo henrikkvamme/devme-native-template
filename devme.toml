@@ -45,7 +45,7 @@ trust = "manual"
 [task.tooling-test]
 kind = "check"
 description = "Verify worktree ports and native device helpers"
-cmd = "bash -n tooling/stripe-webhooks.sh && devme config check && bash tooling/devme-ports.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh"
+cmd = "bash -n tooling/stripe-webhooks.sh && devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh"
 steps = ["dependencies"]
 timeout = 180
 
