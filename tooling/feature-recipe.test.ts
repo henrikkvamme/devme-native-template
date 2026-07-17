@@ -29,7 +29,7 @@ describe("native feature recipe", () => {
       expect(authDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
     }
     expect(read("features/auth/docs/auth.md")).toContain(
-      "Its environment setup writes provider values",
+      "Its required Apple and Google environment setup writes provider values",
     );
     expect(read("features/auth/tooling/ios-auth-xcconfig.sh")).toContain(
       "Run devme from the project root",
@@ -47,6 +47,16 @@ describe("native feature recipe", () => {
       "@better-auth/stripe",
     );
     expect(read("features/auth/backend/devme.toml")).not.toContain("stripe-webhooks");
+    expect(read("features/auth/backend/devme.toml")).toContain(
+      'cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"',
+    );
+    expect(read("features/auth/backend/devme.toml")).toContain('depends_on = ["auth-doctor"]');
+    expect(read("features/auth/apps/ios/devme.toml")).toContain(
+      'depends_on = ["backend::auth-doctor"]',
+    );
+    expect(read("features/auth/apps/android/devme.toml")).toContain(
+      'depends_on = ["backend::auth-doctor"]',
+    );
     expect(read("features/auth/contracts/function-spec.json")).not.toContain(
       "subscriptionForDiagnostics",
     );
@@ -81,6 +91,9 @@ describe("native feature recipe", () => {
     );
     expect(read("features/billing-stripe-external/backend/package.json")).toContain(
       '"auth": "1.6.23"',
+    );
+    expect(read("features/billing-stripe-external/backend/devme.toml")).toContain(
+      'cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"',
     );
     expect(read("features/billing-stripe-external/backend/convex/betterAuth/auth.ts")).toContain(
       "ACTIVE_SUBSCRIPTION",

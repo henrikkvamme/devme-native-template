@@ -56,9 +56,9 @@ timeout = 180
 
 [task.auth-doctor]
 kind = "utility"
-description = "Show auth, provider, and official-doc readiness without revealing secrets"
-cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor"
-depends_on = ["deploy"]
+description = "Validate auth, provider, and official-doc readiness without revealing secrets"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"
+depends_on = ["auth-configure"]
 steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
@@ -97,6 +97,6 @@ kind = "launch"
 visibility = "internal"
 description = "Start Convex and deploy the authenticated backend"
 cmd = "true"
-depends_on = ["deploy"]
+depends_on = ["auth-doctor"]
 services = ["convex"]
 timeout = 180

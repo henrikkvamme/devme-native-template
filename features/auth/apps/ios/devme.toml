@@ -12,8 +12,9 @@ description = "Build and launch Starter in the iOS Simulator"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-simulator.sh"
 depends_on = ["backend::auth-doctor"]
 steps = ["root::dependencies"]
-services = ["backend::convex", "backend::stripe-webhooks"]
+services = ["backend::convex"]
 timeout = 1200
+artifacts = [".devme/ios-simulator-build-{slot}.log"]
 
 [task.device]
 kind = "launch"
@@ -21,7 +22,7 @@ description = "Build, install, and launch Starter on a connected iPhone"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-device.sh launch"
 depends_on = ["device-backend"]
 steps = ["root::dependencies", "tailscale"]
-services = ["backend::convex", "backend::stripe-webhooks"]
+services = ["backend::convex"]
 resources = ["root::ios-device"]
 timeout = 1200
 artifacts = [".devme/ios-device-build-{slot}.log"]
@@ -79,7 +80,7 @@ steps = ["tailscale"]
 timeout = 30
 
 [session.dev]
-needs = ["backend::convex", "backend::stripe-webhooks"]
+needs = ["backend::convex"]
 resources = ["root::ios-simulator"]
 run = "simulator"
 linger = 30

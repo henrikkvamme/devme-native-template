@@ -111,6 +111,9 @@ ENV
   "$devme_bin" feature add auth --no-input --output toon
   test -f backend/convex/betterAuth/auth.ts
   ! grep -q '@better-auth/stripe' backend/package.json
+  grep -q 'auth-doctor --strict' backend/devme.toml
+  grep -q 'depends_on = \["backend::auth-doctor"\]' apps/ios/devme.toml
+  grep -q 'depends_on = \["backend::auth-doctor"\]' apps/android/devme.toml
   "$devme_bin" run backend::test --output toon
 
   "$devme_bin" feature add billing-stripe-external --no-input --output toon
