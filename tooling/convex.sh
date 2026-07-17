@@ -53,6 +53,11 @@ admin_key() {
 }
 
 run_compose_service() {
+  cleanup_compose_service() {
+    trap - EXIT INT TERM
+    compose down --remove-orphans
+  }
+  trap cleanup_compose_service EXIT INT TERM
   compose up --remove-orphans
 }
 
