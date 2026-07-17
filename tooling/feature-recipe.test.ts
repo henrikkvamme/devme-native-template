@@ -8,6 +8,25 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 
 describe("native feature recipe", () => {
   it("keeps auth independent from Stripe", () => {
+    const authDevme = read("features/auth/devme.toml");
+
+    expect(authDevme).toContain('env_file = ".env.auth.local"');
+    expect(authDevme).toContain("[env.GOOGLE_WEB_CLIENT_ID]");
+    expect(authDevme).toContain("[env.GOOGLE_IOS_CLIENT_ID]");
+    expect(authDevme).toContain("[env.GOOGLE_CLIENT_SECRET]");
+    expect(authDevme).toContain("[env.APPLE_PRIVATE_KEY_FILE]");
+    expect(read("features/auth/docs/auth.md")).toContain(
+      "Its environment setup writes provider values",
+    );
+    expect(read("features/auth/tooling/ios-auth-xcconfig.sh")).toContain(
+      "Run devme from the project root",
+    );
+    expect(read("features/auth/tooling/android-emulator.sh")).toContain(
+      "AUTH_CONFIG_FILE:-$root/.env.auth.local",
+    );
+    expect(read("features/auth/tooling/android-emulator.test.sh")).toContain(
+      "unconfigured-auth.env",
+    );
     expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/stripe");
     expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/cli");
     expect(read("features/auth/backend/package.json")).toContain('"auth": "1.6.23"');
@@ -32,6 +51,11 @@ describe("native feature recipe", () => {
 
   it("declares external Stripe billing as an auth-dependent, reversible feature", () => {
     const manifest = read("devme-template.toml");
+    const billingDevme = read("features/billing-stripe-external/devme.toml");
+
+    expect(billingDevme).toContain('env_file = ".env.auth.local"');
+    expect(billingDevme).toContain("[env.STRIPE_SECRET_KEY]");
+    expect(billingDevme).toContain("[env.STRIPE_PRICE_ID]");
     expect(manifest).toContain("[features.auth]");
     expect(manifest).toContain("[features.billing-stripe-external]");
     expect(manifest).toContain('dependencies = ["auth"]');

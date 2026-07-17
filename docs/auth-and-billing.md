@@ -11,7 +11,7 @@ devme feature add billing-stripe-external
 
 External Stripe billing installs Auth automatically. Use it only for an app, store, and region where external checkout is permitted. Devme installs changed dependencies and reloads the service graph in the same command.
 
-Copy `.env.auth.example` to `.env.auth.local`, configure the providers you need, then apply them:
+Run `devme` and complete its environment setup for the providers you need. Devme writes the ignored `.env.auth.local` file. Then apply it:
 
 ```sh
 devme run backend::auth-configure --output toon
