@@ -8,6 +8,10 @@ readonly docker_pid_file="$temporary_directory/docker.pid"
 readonly fake_bin="$temporary_directory/bin"
 mkdir -p "$fake_bin"
 
+grep -Fq \
+  'stop = "DEVME_SLOT={slot} CONVEX_PORT={port} ../tooling/convex.sh down"' \
+  "$root/backend/devme.toml"
+
 cleanup() {
   rm -rf "$temporary_directory"
 }
@@ -56,7 +60,18 @@ if [[ "$service_status" -ne 0 && "$service_status" -ne 143 ]]; then
   exit 1
 fi
 
-grep -q 'compose.* down .*--remove-orphans .*--timeout 1' "$docker_log"
+if grep -q 'compose.* down' "$docker_log"; then
+  printf 'Convex service performed teardown outside Devme stop handling.\n' >&2
+  exit 1
+fi
+
+DOCKER_LOG="$docker_log" \
+DOCKER_PID_FILE="$docker_pid_file" \
+PATH="$fake_bin:$PATH" \
+DEVME_SLOT=99 \
+CONVEX_INSTANCE_SECRET="$(printf 'a%.0s' {1..64})" \
+  "$root/tooling/convex.sh" down
+grep -q 'compose.* down .*--remove-orphans' "$docker_log"
 
 immediate_exit_log="$temporary_directory/immediate-exit.log"
 set +e
@@ -75,10 +90,4 @@ if [[ "$immediate_exit_status" -ne 42 ]]; then
     "$immediate_exit_status" >&2
   exit 1
 fi
-if grep -q 'unbound variable' "$immediate_exit_log"; then
-  cat "$immediate_exit_log" >&2
-  printf 'Convex service cleanup referenced an out-of-scope variable.\n' >&2
-  exit 1
-fi
-
-printf 'Convex service cleanup test passed.\n'
+printf 'Convex service lifecycle test passed.\n'
