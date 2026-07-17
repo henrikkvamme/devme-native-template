@@ -21,6 +21,12 @@ describe("native feature recipe", () => {
     expect(read("features/auth/tooling/ios-auth-xcconfig.sh")).toContain(
       "Run devme from the project root",
     );
+    expect(read("features/auth/tooling/android-emulator.sh")).toContain(
+      "AUTH_CONFIG_FILE:-$root/.env.auth.local",
+    );
+    expect(read("features/auth/tooling/android-emulator.test.sh")).toContain(
+      "unconfigured-auth.env",
+    );
     expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/stripe");
     expect(read("features/auth/backend/package.json")).not.toContain("@better-auth/cli");
     expect(read("features/auth/backend/package.json")).toContain('"auth": "1.6.23"');
