@@ -70,6 +70,7 @@ DEVME_SLOT=99 \
 CONVEX_INSTANCE_SECRET="$(printf 'a%.0s' {1..64})" \
   "$root/tooling/convex.sh" down
 grep -q 'compose.* down .*--remove-orphans' "$docker_log"
+grep -q 'compose.* down .*--remove-orphans .*--timeout 1' "$docker_log"
 explicit_down_count="$(grep -c 'compose.* down .*--remove-orphans' "$docker_log")"
 if [[ "$explicit_down_count" -le "$fallback_down_count" ]]; then
   printf 'Convex explicit stop did not run Compose teardown.\n' >&2

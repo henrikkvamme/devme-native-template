@@ -52,10 +52,14 @@ admin_key() {
   printf '%s\n' "$key"
 }
 
+stop_compose_service() {
+  compose down --remove-orphans --timeout "${DEVME_COMPOSE_STOP_TIMEOUT:-1}"
+}
+
 run_compose_service() {
   cleanup_compose_service() {
     trap - EXIT INT TERM
-    compose down --remove-orphans
+    stop_compose_service
   }
   trap cleanup_compose_service EXIT INT TERM
   compose up --remove-orphans
@@ -66,7 +70,7 @@ case "${1:-}" in
     run_compose_service
     ;;
   down)
-    compose down --remove-orphans
+    stop_compose_service
     ;;
   deploy)
     admin_key="$(admin_key)"
