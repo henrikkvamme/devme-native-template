@@ -13,6 +13,14 @@ External Stripe billing installs Auth automatically. Use it only for an app, sto
 
 Run `devme` and complete its required Apple, Google, and Stripe environment setup. Devme writes the ignored `.env.auth.local` file. Then apply it:
 
+Create all three OAuth clients in the same Google Cloud project:
+
+- **Web application**: the server client used by Better Auth. Copy its client ID and client secret.
+- **iOS**: the native client tied to the iOS bundle identifier.
+- **Android**: the native client tied to the Android package and signing certificate fingerprint.
+
+The Web application client does not replace either native client. Google uses the Web client ID as the backend audience for native ID tokens.
+
 ```sh
 devme run backend::auth-configure --output toon
 ```

@@ -9,11 +9,19 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
 describe("native feature recipe", () => {
   it("keeps auth independent from Stripe", () => {
     const authDevme = read("features/auth/devme.toml");
+    const rootDevme = read("devme.toml");
 
     expect(authDevme).toContain('env_file = ".env.auth.local"');
     expect(authDevme).toContain("[env.GOOGLE_WEB_CLIENT_ID]");
     expect(authDevme).toContain("[env.GOOGLE_IOS_CLIENT_ID]");
     expect(authDevme).toContain("[env.GOOGLE_CLIENT_SECRET]");
+    for (const setupConfig of [rootDevme, authDevme]) {
+      expect(setupConfig).toContain(
+        "Create a Web application client plus separate iOS and Android clients in the same Google Cloud project.",
+      );
+      expect(setupConfig).toContain("Application type: iOS.");
+      expect(setupConfig).toContain("Application type: Android;");
+    }
     expect(authDevme).toContain("[env.APPLE_PRIVATE_KEY_FILE]");
     for (const name of [
       "GOOGLE_WEB_CLIENT_ID",
@@ -30,6 +38,9 @@ describe("native feature recipe", () => {
     }
     expect(read("features/auth/docs/auth.md")).toContain(
       "Its required Apple and Google environment setup writes provider values",
+    );
+    expect(read("features/auth/docs/auth.md")).toContain(
+      "Create all three OAuth clients in the same Google Cloud project",
     );
     expect(read("features/auth/tooling/ios-auth-xcconfig.sh")).toContain(
       "Run devme from the project root",
@@ -80,6 +91,12 @@ describe("native feature recipe", () => {
     expect(billingDevme).toContain('env_file = ".env.auth.local"');
     expect(billingDevme).toContain("[env.STRIPE_SECRET_KEY]");
     expect(billingDevme).toContain("[env.STRIPE_PRICE_ID]");
+    expect(billingDevme).toContain(
+      "Create a Web application client plus separate iOS and Android clients in the same Google Cloud project.",
+    );
+    expect(read("features/billing-stripe-external/docs/auth-and-billing.md")).toContain(
+      "Create all three OAuth clients in the same Google Cloud project",
+    );
     for (const name of ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"]) {
       expect(billingDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
     }
