@@ -3,6 +3,7 @@ set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$root/tooling/devme-ports.sh"
+source "$root/tooling/ios-simulator-ready.sh"
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
 readonly derived_data="$root/.devme/DerivedData-$slot"
@@ -58,8 +59,7 @@ IFS=$'\t' read -r before_id _ < <(
 )
 
 rm -rf "$result_bundle"
-xcrun simctl boot "$simulator_udid"
-xcrun simctl bootstatus "$simulator_udid" -b
+devme_boot_ios_simulator xcrun "$simulator_udid"
 
 xcodebuild test \
   -project "$root/apps/ios/Starter.xcodeproj" \

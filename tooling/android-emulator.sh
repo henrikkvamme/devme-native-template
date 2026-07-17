@@ -3,6 +3,7 @@ set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$root/tooling/devme-ports.sh"
+source "$root/tooling/android-emulator-lifecycle.sh"
 readonly sdk_root="${ANDROID_SDK_ROOT:-$root/.devme/android-sdk}"
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
@@ -23,6 +24,8 @@ readonly avdmanager="${AVDMANAGER_BIN:-$sdk_root/cmdline-tools/latest/bin/avdman
 readonly gradle="${GRADLE_BIN:-$root/apps/android/gradlew}"
 readonly avd_home="${ANDROID_AVD_HOME:-$root/.devme/avd-$slot}"
 readonly emulator_log="$root/.devme/android-emulator-$slot.log"
+readonly launchctl_bin="${LAUNCHCTL_BIN:-launchctl}"
+readonly platform="${DEVME_TEST_PLATFORM:-$(uname -s)}"
 google_web_client_id="${GOOGLE_WEB_CLIENT_ID:-}"
 
 export ANDROID_HOME="$sdk_root"
@@ -49,12 +52,12 @@ if [[ ! -f "$avd_home/$avd_name.avd/config.ini" ]]; then
 fi
 
 booted="$($adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)"
-if [[ "$booted" != "1" ]]; then
+if [[ "$booted" != "1" ]] && ! "$adb" -s "$serial" get-state >/dev/null 2>&1; then
   if [[ "${DEVME_TEST_EMULATOR_FOREGROUND:-0}" == "1" ]]; then
     "$emulator" -avd "$avd_name" -port "$emulator_port" >"$emulator_log" 2>&1 &
-  elif [[ "$(uname -s)" == "Darwin" ]]; then
-    launchctl remove "devme.starter.android.$slot" >/dev/null 2>&1 || true
-    launchctl submit \
+  elif [[ "$platform" == "Darwin" ]]; then
+    "$launchctl_bin" remove "devme.starter.android.$slot" >/dev/null 2>&1 || true
+    "$launchctl_bin" submit \
       -l "devme.starter.android.$slot" \
       -o "$emulator_log" \
       -e "$emulator_log" \
@@ -64,20 +67,17 @@ if [[ "$booted" != "1" ]]; then
       ANDROID_AVD_HOME="$avd_home" \
       HOME="$HOME" \
       "$emulator" -avd "$avd_name" -port "$emulator_port" -no-audio -no-boot-anim
+    "$launchctl_bin" kickstart "gui/$(id -u)/devme.starter.android.$slot"
   else
     setsid "$emulator" -avd "$avd_name" -port "$emulator_port" \
       -no-audio -no-boot-anim >"$emulator_log" 2>&1 < /dev/null &
   fi
 
-  deadline=$((SECONDS + 300))
-  until [[ "$($adb -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r' || true)" == "1" ]]; do
-    if ((SECONDS >= deadline)); then
-      tail -n 100 "$emulator_log" >&2 || true
-      printf 'Android emulator did not finish booting.\n' >&2
-      exit 1
-    fi
-    sleep 2
-  done
+fi
+
+if [[ "$booted" != "1" ]] && ! devme_wait_for_android_emulator_boot "$adb" "$serial"; then
+  tail -n 100 "$emulator_log" >&2 || true
+  exit 1
 fi
 
 gradle_arguments=(

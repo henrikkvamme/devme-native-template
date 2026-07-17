@@ -27,6 +27,9 @@ if [[ " $* " == *" shell getprop sys.boot_completed "* ]]; then
     printf '1\n'
   fi
 fi
+if [[ " $* " == *" get-state "* ]]; then
+  [[ -f "$BOOT_MARKER" ]]
+fi
 SH
 
 cat >"$sdk/emulator/emulator" <<'SH'
@@ -40,7 +43,20 @@ cat >"$temporary_directory/gradle" <<'SH'
 printf 'gradle %s\n' "$*" >>"$COMMAND_LOG"
 SH
 
-chmod +x "$sdk/platform-tools/adb" "$sdk/emulator/emulator" "$temporary_directory/gradle"
+cat >"$temporary_directory/launchctl" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+printf 'launchctl %s\n' "$*" >>"$COMMAND_LOG"
+if [[ "${1:-}" == "kickstart" ]]; then
+  touch "$BOOT_MARKER"
+fi
+SH
+
+chmod +x \
+  "$sdk/platform-tools/adb" \
+  "$sdk/emulator/emulator" \
+  "$temporary_directory/gradle" \
+  "$temporary_directory/launchctl"
 
 output="$({
   COMMAND_LOG="$commands" \
@@ -50,13 +66,16 @@ output="$({
   ADB_BIN="$sdk/platform-tools/adb" \
   ANDROID_EMULATOR_BIN="$sdk/emulator/emulator" \
   GRADLE_BIN="$temporary_directory/gradle" \
+  LAUNCHCTL_BIN="$temporary_directory/launchctl" \
   ANDROID_APK_PATH="$temporary_directory/app.apk" \
-  DEVME_TEST_EMULATOR_FOREGROUND=1 \
+  AUTH_CONFIG_FILE="$temporary_directory/unconfigured-auth.env" \
+  DEVME_TEST_PLATFORM=Darwin \
     "$root/tooling/android-emulator.sh"
 })"
 
 grep -q 'gradle .*assembleDebug' "$commands"
-grep -q 'emulator -avd starter-devme-0 -port 5554' "$commands"
+grep -q 'launchctl submit .*emulator -avd starter-devme-0 -port 5554' "$commands"
+grep -q 'launchctl kickstart gui/.*/devme.starter.android.0' "$commands"
 grep -q 'adb -s emulator-5554 install -r' "$commands"
 grep -q 'shell am start -W -n dev.starter.app/.MainActivity' "$commands"
 grep -q 'target: "emulator-5554"' <<<"$output"

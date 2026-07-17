@@ -3,6 +3,7 @@ set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$root/tooling/devme-ports.sh"
+source "$root/tooling/ios-simulator-ready.sh"
 
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
@@ -77,10 +78,7 @@ if [[ ! -d "$app" ]]; then
     'Inspect the Xcode build output and the configured DerivedData path.'
 fi
 
-if ! "$xcrun_bin" simctl list devices booted | grep -Fq "$simulator_udid"; then
-  "$xcrun_bin" simctl boot "$simulator_udid" >/dev/null
-fi
-"$xcrun_bin" simctl bootstatus "$simulator_udid" -b >/dev/null
+devme_boot_ios_simulator "$xcrun_bin" "$simulator_udid"
 
 readonly bundle_id="$("$plist_buddy_bin" -c 'Print :CFBundleIdentifier' "$app/Info.plist")"
 if ! "$xcrun_bin" simctl install "$simulator_udid" "$app" >/dev/null; then

@@ -37,7 +37,7 @@ trust = "manual"
 kind = "check"
 visibility = "internal"
 description = "Verify worktree ports and native device helpers"
-cmd = "devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh && bash tooling/android-emulator.test.sh"
+cmd = "devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh && bash tooling/ios-simulator-ready.test.sh && bash tooling/ios-test.test.sh && bash tooling/android-emulator-lifecycle.test.sh && bash tooling/android-emulator.test.sh"
 steps = ["dependencies"]
 timeout = 180
 
