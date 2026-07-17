@@ -68,7 +68,7 @@ describe("native feature recipe", () => {
       'restart: "on-failure:5"',
     );
     expect(read("features/auth/.github/workflows/ci.yml")).toContain(
-      "06b4277689b39aab7faab318f9da180ae996c35f",
+      "feea57f58cb95df7cbc8076795534964736ca659",
     );
     expect(read("features/auth/.github/workflows/ci.yml")).not.toContain("DEVME_CI_WITH_STRIPE");
   });

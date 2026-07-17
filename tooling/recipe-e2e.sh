@@ -112,15 +112,12 @@ ENV
   grep -q 'depends_on = \["backend::auth-doctor"\]' apps/ios/devme.toml
   grep -q 'depends_on = \["backend::auth-doctor"\]' apps/android/devme.toml
   RUNNER_TEMP="$sandbox/auth-ci" tooling/ci-auth-fixture.sh
-  "$devme_bin" up -d --wait --timeout 120
-  "$devme_bin" run backend::auth-configure --output toon
-  "$devme_bin" run backend::test --output toon
+  "$devme_bin" run ci-core --output toon
 
   DEVME_CI_WITH_STRIPE=1 RUNNER_TEMP="$sandbox/billing-ci" tooling/ci-auth-fixture.sh
   "$devme_bin" feature add billing-stripe-external --no-input --output toon
   grep -q '@better-auth/stripe' backend/package.json
-  "$devme_bin" run backend::auth-configure --output toon
-  "$devme_bin" run backend::test --output toon
+  "$devme_bin" run ci-core --output toon
 
   "$devme_bin" feature add release-ios --no-input --output toon
   test -x apps/ios/ci_scripts/ci_pre_xcodebuild.sh

@@ -24,7 +24,7 @@ jobs:
           bun-version: 1.3.13
       - name: Build pinned Devme
         env:
-          DEVME_REVISION: 06b4277689b39aab7faab318f9da180ae996c35f
+          DEVME_REVISION: feea57f58cb95df7cbc8076795534964736ca659
         run: |
           git clone --filter=blob:none https://github.com/devme-sh/devme.git "$RUNNER_TEMP/devme"
           git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
@@ -35,7 +35,4 @@ jobs:
           DEVME_CI_WITH_STRIPE: "1"
         run: tooling/ci-auth-fixture.sh
       - name: Verify portable core
-        run: |
-          devme up -d --wait --timeout 120
-          devme run backend::auth-configure --output toon
-          devme run ci-core --output toon
+        run: devme run ci-core --output toon
