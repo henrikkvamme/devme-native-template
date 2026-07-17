@@ -60,10 +60,8 @@ if [[ "$service_status" -ne 0 && "$service_status" -ne 143 ]]; then
   exit 1
 fi
 
-if grep -q 'compose.* down' "$docker_log"; then
-  printf 'Convex service performed teardown outside Devme stop handling.\n' >&2
-  exit 1
-fi
+grep -q 'compose.* down .*--remove-orphans' "$docker_log"
+fallback_down_count="$(grep -c 'compose.* down .*--remove-orphans' "$docker_log")"
 
 DOCKER_LOG="$docker_log" \
 DOCKER_PID_FILE="$docker_pid_file" \
@@ -72,6 +70,11 @@ DEVME_SLOT=99 \
 CONVEX_INSTANCE_SECRET="$(printf 'a%.0s' {1..64})" \
   "$root/tooling/convex.sh" down
 grep -q 'compose.* down .*--remove-orphans' "$docker_log"
+explicit_down_count="$(grep -c 'compose.* down .*--remove-orphans' "$docker_log")"
+if [[ "$explicit_down_count" -le "$fallback_down_count" ]]; then
+  printf 'Convex explicit stop did not run Compose teardown.\n' >&2
+  exit 1
+fi
 
 immediate_exit_log="$temporary_directory/immediate-exit.log"
 set +e
@@ -88,6 +91,11 @@ if [[ "$immediate_exit_status" -ne 42 ]]; then
   cat "$immediate_exit_log" >&2
   printf 'Convex service did not preserve the immediate Compose exit status: %s.\n' \
     "$immediate_exit_status" >&2
+  exit 1
+fi
+failed_up_down_count="$(grep -c 'compose.* down .*--remove-orphans' "$docker_log")"
+if [[ "$failed_up_down_count" -le "$explicit_down_count" ]]; then
+  printf 'Convex failed startup did not clean up its Compose project.\n' >&2
   exit 1
 fi
 printf 'Convex service lifecycle test passed.\n'
