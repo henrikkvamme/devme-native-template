@@ -14,18 +14,23 @@ help = "Display name used by Better Auth."
 [env.GOOGLE_WEB_CLIENT_ID]
 required = true
 help = "Google web OAuth client ID for native Google sign-in. Create it using https://console.cloud.google.com/apis/credentials."
+setup_url = "https://console.cloud.google.com/apis/credentials"
 
 [env.GOOGLE_IOS_CLIENT_ID]
 required = true
 help = "Google iOS OAuth client ID for iOS Google sign-in."
+setup_url = "https://console.cloud.google.com/apis/credentials"
 
 [env.GOOGLE_ANDROID_CLIENT_ID]
 required = true
 help = "Google Android OAuth client ID for the Android package and signing certificate."
+setup_url = "https://console.cloud.google.com/apis/credentials"
 
 [env.GOOGLE_CLIENT_SECRET]
 required = true
 help = "Google web OAuth client secret used by the Better Auth Google provider."
+setup_url = "https://console.cloud.google.com/apis/credentials"
+secret = true
 
 [env.APPLE_CLIENT_ID]
 required = true
