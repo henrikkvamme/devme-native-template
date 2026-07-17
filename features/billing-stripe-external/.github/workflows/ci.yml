@@ -31,6 +31,8 @@ jobs:
           cargo build --release --locked --workspace --bins --manifest-path "$RUNNER_TEMP/devme/Cargo.toml"
           echo "$RUNNER_TEMP/devme/target/release" >> "$GITHUB_PATH"
       - name: Prepare non-production auth fixture
+        env:
+          DEVME_CI_WITH_STRIPE: "1"
         run: tooling/ci-auth-fixture.sh
       - name: Verify portable core
         run: |

@@ -1,14 +1,14 @@
 schema_version = 1
 name = "native"
-version = "2026.7.17.2"
+version = "2026.7.17.3"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
-revision = "c00e0e34f5933c1cb6f9929cce6a527ef34098a0"
+revision = "a6e0d06219c6cc1938bb6f0bc6db680b62dc9ae8"
 subdir = "."
 
 [features.auth]
-version = "1.2.0"
+version = "1.2.1"
 path = "features/auth"
 external_steps = [
   "Choose final iOS and Android application identifiers before creating provider credentials.",
@@ -21,7 +21,7 @@ remove_external_steps = [
 ]
 
 [features.billing-stripe-external]
-version = "1.2.0"
+version = "1.2.1"
 path = "features/billing-stripe-external"
 dependencies = ["auth"]
 external_steps = [

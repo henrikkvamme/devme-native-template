@@ -31,7 +31,7 @@ jobs:
         # Pin the reviewed project-composer revision until it is included in a
         # tagged Devme release.
         env:
-          DEVME_REVISION: b14b342915841bdb4ebdc380ea81d715b630f107
+          DEVME_REVISION: 06b4277689b39aab7faab318f9da180ae996c35f
         run: |
           git clone --filter=blob:none https://github.com/devme-sh/devme.git "$RUNNER_TEMP/devme"
           git -C "$RUNNER_TEMP/devme" checkout --detach "$DEVME_REVISION"
@@ -44,9 +44,16 @@ jobs:
           CONVEX_INSTANCE_SECRET: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
         run: docker compose --file infrastructure/convex/compose.yaml pull
 
+      - name: Prepare non-production auth fixture
+        env:
+          DEVME_CI_WITH_STRIPE: "1"
+        run: tooling/ci-auth-fixture.sh
+
       - name: Run portable Devme checks
         timeout-minutes: 20
-        run: devme run ci-core --output toon
+        run: |
+          devme run backend::auth-configure --output toon
+          devme run ci-core --output toon
 
       - name: Preserve backend diagnostics
         if: failure()

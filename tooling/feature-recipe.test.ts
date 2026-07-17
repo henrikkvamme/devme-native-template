@@ -68,8 +68,9 @@ describe("native feature recipe", () => {
       'restart: "on-failure:5"',
     );
     expect(read("features/auth/.github/workflows/ci.yml")).toContain(
-      "b14b342915841bdb4ebdc380ea81d715b630f107",
+      "06b4277689b39aab7faab318f9da180ae996c35f",
     );
+    expect(read("features/auth/.github/workflows/ci.yml")).not.toContain("DEVME_CI_WITH_STRIPE");
   });
 
   it("declares external Stripe billing as an auth-dependent, reversible feature", () => {
@@ -121,6 +122,9 @@ describe("native feature recipe", () => {
     );
     expect(read("features/billing-stripe-external/contracts/function-spec.json")).toContain(
       "subscriptionForDiagnostics",
+    );
+    expect(read("features/billing-stripe-external/.github/workflows/ci.yml")).toContain(
+      'DEVME_CI_WITH_STRIPE: "1"',
     );
   });
 

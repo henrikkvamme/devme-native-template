@@ -7,6 +7,8 @@ export default defineConfig({
       "apps/**",
       "backend/confect/_generated/**",
       "backend/convex/_generated/**",
+      "features/**/backend/confect/_generated/**",
+      "features/**/backend/convex/_generated/**",
       "contracts/function-spec.json",
     ],
     semi: true,
