@@ -293,7 +293,7 @@ const runDoctor = async (arguments_: string[]) => {
     console.log(`  ${area},${toonString(url)}`);
   if (!externalReady) {
     console.log("help[2]:");
-    console.log('  "Copy `.env.auth.example` to `.env.auth.local` and fill one or more groups."');
+    console.log('  "Run `devme` from the project root to configure one or more provider groups."');
     console.log('  "Run `devme run backend::auth-configure --output toon`."');
   }
 

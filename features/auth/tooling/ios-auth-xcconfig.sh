@@ -7,7 +7,7 @@ readonly output="${IOS_AUTH_XCCONFIG:-$root/.devme/Auth.local.xcconfig}"
 
 if [[ ! -f "$input" ]]; then
   printf 'error: "Native iOS auth is not configured."\n'
-  printf 'help[1]: "Copy .env.auth.example to .env.auth.local and configure the Google web and iOS OAuth clients."\n'
+  printf 'help[1]: "Run devme from the project root and complete environment setup for the Google web and iOS OAuth clients."\n'
   exit 1
 fi
 

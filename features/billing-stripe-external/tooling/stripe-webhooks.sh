@@ -20,7 +20,7 @@ fi
 
 if [[ ! -f "$config_file" ]]; then
   printf 'Stripe webhook forwarding requires %s.\n' "$config_file" >&2
-  printf 'Copy .env.auth.example, add STRIPE_SECRET_KEY and STRIPE_PRICE_ID, then run backend::auth-configure.\n' >&2
+  printf 'Run devme to add STRIPE_SECRET_KEY and STRIPE_PRICE_ID, then run backend::auth-configure.\n' >&2
   exit 1
 fi
 
