@@ -112,6 +112,7 @@ ENV
   grep -q 'depends_on = \["backend::auth-doctor"\]' apps/ios/devme.toml
   grep -q 'depends_on = \["backend::auth-doctor"\]' apps/android/devme.toml
   RUNNER_TEMP="$sandbox/auth-ci" tooling/ci-auth-fixture.sh
+  "$devme_bin" up -d --wait --timeout 120
   "$devme_bin" run backend::auth-configure --output toon
   "$devme_bin" run backend::test --output toon
 

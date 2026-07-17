@@ -34,5 +34,6 @@ jobs:
         run: tooling/ci-auth-fixture.sh
       - name: Verify portable core
         run: |
+          devme up -d --wait --timeout 120
           devme run backend::auth-configure --output toon
           devme run ci-core --output toon

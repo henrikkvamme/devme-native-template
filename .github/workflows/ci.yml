@@ -52,6 +52,7 @@ jobs:
       - name: Run portable Devme checks
         timeout-minutes: 20
         run: |
+          devme up -d --wait --timeout 120
           devme run backend::auth-configure --output toon
           devme run ci-core --output toon
 
