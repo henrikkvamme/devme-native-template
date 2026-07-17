@@ -7,44 +7,57 @@ description = "Native iOS and Android starter with a self-hosted Convex backend"
 env_file = ".env.auth.local"
 
 [env.AUTH_APP_NAME]
+required = true
 default = "Starter"
 help = "Display name used by Better Auth."
 
 [env.GOOGLE_WEB_CLIENT_ID]
-help = "Optional Google web OAuth client ID. Required for native Google sign-in. Create it using https://console.cloud.google.com/apis/credentials."
+required = true
+help = "Google web OAuth client ID for native Google sign-in. Create it using https://console.cloud.google.com/apis/credentials."
 
 [env.GOOGLE_IOS_CLIENT_ID]
-help = "Optional Google iOS OAuth client ID. Required for iOS Google sign-in."
+required = true
+help = "Google iOS OAuth client ID for iOS Google sign-in."
 
 [env.GOOGLE_ANDROID_CLIENT_ID]
-help = "Optional Google Android OAuth client ID. Record it when configuring the Android package and signing certificate."
+required = true
+help = "Google Android OAuth client ID for the Android package and signing certificate."
 
 [env.GOOGLE_CLIENT_SECRET]
-help = "Optional Google web OAuth client secret. Required by the Better Auth Google provider."
+required = true
+help = "Google web OAuth client secret used by the Better Auth Google provider."
 
 [env.APPLE_CLIENT_ID]
-help = "Optional Apple Services ID used by the Better Auth Apple provider."
+required = true
+help = "Apple Services ID used by the Better Auth Apple provider."
 
 [env.APPLE_TEAM_ID]
-help = "Optional Apple Developer Team ID."
+required = true
+help = "Apple Developer Team ID."
 
 [env.APPLE_KEY_ID]
-help = "Optional Sign in with Apple private key ID."
+required = true
+help = "Sign in with Apple private key ID."
 
 [env.APPLE_PRIVATE_KEY_FILE]
-help = "Optional absolute path to the downloaded Sign in with Apple .p8 key. Keep the key outside this repository."
+required = true
+help = "Absolute path to the downloaded Sign in with Apple .p8 key. Keep the key outside this repository."
 
 [env.APPLE_APP_BUNDLE_IDENTIFIER]
-help = "Optional iOS bundle identifier registered for Sign in with Apple."
+required = true
+help = "iOS bundle identifier registered for Sign in with Apple."
 
 [env.STRIPE_SECRET_KEY]
-help = "Optional Stripe sandbox secret key. Add billing only after confirming store-policy eligibility."
+required = true
+help = "Stripe sandbox secret key. Add billing only after confirming store-policy eligibility."
 
 [env.STRIPE_WEBHOOK_SECRET]
-help = "Optional Stripe CLI webhook signing secret for local subscription testing."
+required = true
+help = "Stripe CLI webhook signing secret for local subscription testing."
 
 [env.STRIPE_PRICE_ID]
-help = "Optional Stripe sandbox recurring price ID."
+required = true
+help = "Stripe sandbox recurring price ID."
 
 [workspace.members]
 backend = "backend"
@@ -88,7 +101,7 @@ trust = "manual"
 kind = "check"
 visibility = "internal"
 description = "Verify worktree ports and native device helpers"
-cmd = "bash -n tooling/stripe-webhooks.sh && devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh && bash tooling/android-emulator.test.sh"
+cmd = "bash -n tooling/stripe-webhooks.sh && devme config check && bash tooling/devme-ports.test.sh && bash tooling/convex.test.sh && bash tooling/ios-device.test.sh && bash tooling/ios-simulator.test.sh && bash tooling/ios-simulator-ready.test.sh && bash tooling/ios-test.test.sh && bash tooling/android-emulator-lifecycle.test.sh && bash tooling/android-emulator.test.sh"
 steps = ["dependencies"]
 timeout = 180
 

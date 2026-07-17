@@ -15,8 +15,21 @@ describe("native feature recipe", () => {
     expect(authDevme).toContain("[env.GOOGLE_IOS_CLIENT_ID]");
     expect(authDevme).toContain("[env.GOOGLE_CLIENT_SECRET]");
     expect(authDevme).toContain("[env.APPLE_PRIVATE_KEY_FILE]");
+    for (const name of [
+      "GOOGLE_WEB_CLIENT_ID",
+      "GOOGLE_IOS_CLIENT_ID",
+      "GOOGLE_ANDROID_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "APPLE_CLIENT_ID",
+      "APPLE_TEAM_ID",
+      "APPLE_KEY_ID",
+      "APPLE_PRIVATE_KEY_FILE",
+      "APPLE_APP_BUNDLE_IDENTIFIER",
+    ]) {
+      expect(authDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
+    }
     expect(read("features/auth/docs/auth.md")).toContain(
-      "Its environment setup writes provider values",
+      "Its required Apple and Google environment setup writes provider values",
     );
     expect(read("features/auth/tooling/ios-auth-xcconfig.sh")).toContain(
       "Run devme from the project root",
@@ -34,6 +47,16 @@ describe("native feature recipe", () => {
       "@better-auth/stripe",
     );
     expect(read("features/auth/backend/devme.toml")).not.toContain("stripe-webhooks");
+    expect(read("features/auth/backend/devme.toml")).toContain(
+      'cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"',
+    );
+    expect(read("features/auth/backend/devme.toml")).toContain('depends_on = ["auth-doctor"]');
+    expect(read("features/auth/apps/ios/devme.toml")).toContain(
+      'depends_on = ["backend::auth-doctor"]',
+    );
+    expect(read("features/auth/apps/android/devme.toml")).toContain(
+      'depends_on = ["backend::auth-doctor"]',
+    );
     expect(read("features/auth/contracts/function-spec.json")).not.toContain(
       "subscriptionForDiagnostics",
     );
@@ -45,8 +68,9 @@ describe("native feature recipe", () => {
       'restart: "on-failure:5"',
     );
     expect(read("features/auth/.github/workflows/ci.yml")).toContain(
-      "b14b342915841bdb4ebdc380ea81d715b630f107",
+      "feea57f58cb95df7cbc8076795534964736ca659",
     );
+    expect(read("features/auth/.github/workflows/ci.yml")).not.toContain("DEVME_CI_WITH_STRIPE");
   });
 
   it("declares external Stripe billing as an auth-dependent, reversible feature", () => {
@@ -56,6 +80,9 @@ describe("native feature recipe", () => {
     expect(billingDevme).toContain('env_file = ".env.auth.local"');
     expect(billingDevme).toContain("[env.STRIPE_SECRET_KEY]");
     expect(billingDevme).toContain("[env.STRIPE_PRICE_ID]");
+    for (const name of ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"]) {
+      expect(billingDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
+    }
     expect(manifest).toContain("[features.auth]");
     expect(manifest).toContain("[features.billing-stripe-external]");
     expect(manifest).toContain('dependencies = ["auth"]');
@@ -65,6 +92,9 @@ describe("native feature recipe", () => {
     );
     expect(read("features/billing-stripe-external/backend/package.json")).toContain(
       '"auth": "1.6.23"',
+    );
+    expect(read("features/billing-stripe-external/backend/devme.toml")).toContain(
+      'cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"',
     );
     expect(read("features/billing-stripe-external/backend/convex/betterAuth/auth.ts")).toContain(
       "ACTIVE_SUBSCRIPTION",
@@ -92,6 +122,9 @@ describe("native feature recipe", () => {
     );
     expect(read("features/billing-stripe-external/contracts/function-spec.json")).toContain(
       "subscriptionForDiagnostics",
+    );
+    expect(read("features/billing-stripe-external/.github/workflows/ci.yml")).toContain(
+      'DEVME_CI_WITH_STRIPE: "1"',
     );
   });
 

@@ -60,9 +60,9 @@ timeout = 180
 
 [task.auth-doctor]
 kind = "utility"
-description = "Show auth, provider, billing, and official-doc readiness without revealing secrets"
-cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor"
-depends_on = ["deploy"]
+description = "Validate auth, provider, billing, and official-doc readiness without revealing secrets"
+cmd = "DEVME_SLOT={slot} ../tooling/convex.sh auth-doctor --strict"
+depends_on = ["auth-configure"]
 steps = ["root::dependencies"]
 services = ["convex"]
 timeout = 180
@@ -71,7 +71,7 @@ timeout = 180
 kind = "utility"
 description = "Compare the latest active Stripe sandbox subscription with Better Auth"
 cmd = "DEVME_SLOT={slot} bash ../tooling/stripe-webhooks.sh doctor"
-depends_on = ["deploy"]
+depends_on = ["auth-doctor"]
 steps = ["root::dependencies", "root::stripe-cli"]
 services = ["convex"]
 timeout = 180
@@ -110,6 +110,6 @@ kind = "launch"
 visibility = "internal"
 description = "Start Convex, deploy the backend, and forward Stripe webhooks"
 cmd = "true"
-depends_on = ["deploy"]
+depends_on = ["auth-doctor"]
 services = ["convex", "stripe-webhooks"]
 timeout = 180

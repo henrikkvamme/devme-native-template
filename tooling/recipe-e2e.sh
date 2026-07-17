@@ -85,22 +85,39 @@ cat >"$project/.devme/android-sdk/platform-tools/adb" <<'SH'
 exit 0
 SH
 chmod +x "$project/.devme/android-sdk/platform-tools/adb"
+cat >"$sandbox/AuthKey.p8" <<'KEY'
+-----BEGIN PRIVATE KEY-----
+recipe-e2e-private-key
+-----END PRIVATE KEY-----
+KEY
+cat >"$project/.env.auth.local" <<ENV
+AUTH_APP_NAME=RecipeE2E
+GOOGLE_WEB_CLIENT_ID=recipe-web.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=recipe-ios.apps.googleusercontent.com
+GOOGLE_ANDROID_CLIENT_ID=recipe-android.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=recipe-client-secret
+APPLE_CLIENT_ID=dev.recipe.service
+APPLE_TEAM_ID=RECIPE1234
+APPLE_KEY_ID=RECIPEKEY
+APPLE_PRIVATE_KEY_FILE=$sandbox/AuthKey.p8
+APPLE_APP_BUNDLE_IDENTIFIER=dev.recipe.app
+ENV
 
 (
   cd "$project"
   "$devme_bin" feature add auth --no-input --output toon
   test -f backend/convex/betterAuth/auth.ts
   ! grep -q '@better-auth/stripe' backend/package.json
-  "$devme_bin" run backend::test --output toon
+  grep -q 'auth-doctor --strict' backend/devme.toml
+  grep -q 'depends_on = \["backend::auth-doctor"\]' apps/ios/devme.toml
+  grep -q 'depends_on = \["backend::auth-doctor"\]' apps/android/devme.toml
+  RUNNER_TEMP="$sandbox/auth-ci" tooling/ci-auth-fixture.sh
+  "$devme_bin" run ci-core --output toon
 
-  cat > .env.auth.local <<'ENV'
-AUTH_APP_NAME=RecipeE2E
-STRIPE_SECRET_KEY=sk_test_recipe_e2e
-STRIPE_PRICE_ID=price_recipe_e2e
-ENV
+  DEVME_CI_WITH_STRIPE=1 RUNNER_TEMP="$sandbox/billing-ci" tooling/ci-auth-fixture.sh
   "$devme_bin" feature add billing-stripe-external --no-input --output toon
   grep -q '@better-auth/stripe' backend/package.json
-  "$devme_bin" run backend::test --output toon
+  "$devme_bin" run ci-core --output toon
 
   "$devme_bin" feature add release-ios --no-input --output toon
   test -x apps/ios/ci_scripts/ci_pre_xcodebuild.sh

@@ -3,6 +3,7 @@ set -euo pipefail
 
 readonly root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$root/tooling/devme-ports.sh"
+source "$root/tooling/android-emulator-lifecycle.sh"
 readonly sdk_root="${ANDROID_SDK_ROOT:-$root/.devme/android-sdk}"
 readonly slot="${DEVME_SLOT:-0}"
 readonly convex_port="$(devme_convex_port "$slot")"
@@ -43,6 +44,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 "$adb" -s "$serial" emu kill >/dev/null 2>&1 || true
+devme_wait_for_android_emulator_shutdown "$adb" "$serial"
 "$emulator" \
   -avd "$avd_name" \
   -port "$emulator_port" \
@@ -54,15 +56,10 @@ trap cleanup EXIT INT TERM
   >"$emulator_log" 2>&1 &
 emulator_pid=$!
 
-deadline=$((SECONDS + 300))
-until [[ "$("$adb" -s "$serial" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; do
-  if ((SECONDS >= deadline)); then
-    tail -n 100 "$emulator_log" >&2
-    printf 'Android emulator did not finish booting.\n' >&2
-    exit 1
-  fi
-  sleep 2
-done
+if ! devme_wait_for_android_emulator_boot "$adb" "$serial"; then
+  tail -n 100 "$emulator_log" >&2
+  exit 1
+fi
 
 "$root/apps/android/gradlew" \
   --project-dir "$root/apps/android" \

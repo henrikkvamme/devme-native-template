@@ -5,7 +5,7 @@ The `auth` feature adds Better Auth on Convex, native Sign in with Apple on iOS,
 ## Configure
 
 1. Choose final iOS and Android identifiers.
-2. Run `devme`. Its environment setup writes provider values to the ignored `.env.auth.local` file. The committed `.env.auth.example` remains a reference.
+2. Run `devme`. Its required Apple and Google environment setup writes provider values to the ignored `.env.auth.local` file. The committed `.env.auth.example` remains a reference.
 3. Configure the provider credentials you need in that setup.
 4. Apply and validate them:
 

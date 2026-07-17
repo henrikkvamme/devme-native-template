@@ -10,7 +10,7 @@ depends_on = ["root::bun"]
 kind = "launch"
 description = "Build and launch Starter in the iOS Simulator"
 cmd = "DEVME_SLOT={slot} ../../tooling/ios-simulator.sh"
-depends_on = ["backend::deploy"]
+depends_on = ["backend::auth-doctor"]
 steps = ["root::dependencies"]
 services = ["backend::convex", "backend::stripe-webhooks"]
 timeout = 1200
@@ -65,7 +65,7 @@ kind = "utility"
 visibility = "internal"
 description = "Expose local Convex through private Tailscale HTTPS"
 cmd = "DEVME_SLOT={slot} ../../tooling/tailscale-convex.sh ensure"
-depends_on = ["backend::deploy"]
+depends_on = ["backend::auth-doctor"]
 steps = ["tailscale"]
 services = ["backend::convex"]
 timeout = 120
