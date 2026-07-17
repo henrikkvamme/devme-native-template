@@ -35,22 +35,27 @@ secret = true
 [env.APPLE_CLIENT_ID]
 required = true
 help = "Apple Services ID used by the Better Auth Apple provider."
+setup_url = "https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web"
 
 [env.APPLE_TEAM_ID]
 required = true
 help = "Apple Developer Team ID."
+setup_url = "https://developer.apple.com/help/account/basics/account-landing-page"
 
 [env.APPLE_KEY_ID]
 required = true
 help = "Sign in with Apple private key ID."
+setup_url = "https://developer.apple.com/help/account/keys/get-a-key-identifier"
 
 [env.APPLE_PRIVATE_KEY_FILE]
 required = true
 help = "Absolute path to the downloaded Sign in with Apple .p8 key. Keep the key outside this repository."
+setup_url = "https://developer.apple.com/help/account/capabilities/create-a-sign-in-with-apple-private-key"
 
 [env.APPLE_APP_BUNDLE_IDENTIFIER]
 required = true
 help = "iOS bundle identifier registered for Sign in with Apple."
+setup_url = "https://developer.apple.com/help/account/capabilities/about-sign-in-with-apple"
 
 [workspace.members]
 backend = "backend"

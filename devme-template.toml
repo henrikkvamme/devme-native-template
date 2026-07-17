@@ -1,6 +1,6 @@
 schema_version = 1
 name = "native"
-version = "2026.7.17.7"
+version = "2026.7.17.8"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
@@ -8,7 +8,7 @@ revision = "a6e0d06219c6cc1938bb6f0bc6db680b62dc9ae8"
 subdir = "."
 
 [features.auth]
-version = "1.2.5"
+version = "1.2.6"
 path = "features/auth"
 generated_files = ["backend/convex/betterAuth/_generated/component.ts"]
 external_steps = [
@@ -22,7 +22,7 @@ remove_external_steps = [
 ]
 
 [features.billing-stripe-external]
-version = "1.2.5"
+version = "1.2.6"
 path = "features/billing-stripe-external"
 dependencies = ["auth"]
 generated_files = ["backend/convex/betterAuth/_generated/component.ts"]

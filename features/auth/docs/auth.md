@@ -36,6 +36,8 @@ Apple sign-in on Android is a browser OAuth flow, not an Android native identity
 - [Better Auth user deletion](https://better-auth.com/docs/concepts/users-accounts)
 - [Convex Better Auth component](https://labs.convex.dev/better-auth)
 - [Sign in with Apple](https://developer.apple.com/documentation/authenticationservices/implementing-user-authentication-with-sign-in-with-apple)
+- [Configure Sign in with Apple](https://developer.apple.com/documentation/signinwithapple/configuring-your-environment-for-sign-in-with-apple)
+- [Create a Sign in with Apple private key](https://developer.apple.com/help/account/capabilities/create-a-sign-in-with-apple-private-key/)
 - [Google Sign-In for iOS](https://developers.google.com/identity/sign-in/ios/start-integrating)
 - [Credential Manager Sign in with Google](https://developer.android.com/identity/sign-in/credential-manager-siwg)
 - [Apple account deletion requirement](https://developer.apple.com/support/offering-account-deletion-in-your-app/)
