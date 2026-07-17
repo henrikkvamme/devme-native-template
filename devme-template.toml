@@ -1,6 +1,6 @@
 schema_version = 1
 name = "native"
-version = "2026.7.17.1"
+version = "2026.7.17.2"
 
 [base]
 repository = "https://github.com/henrikkvamme/devme-native-template.git"
@@ -8,12 +8,12 @@ revision = "c00e0e34f5933c1cb6f9929cce6a527ef34098a0"
 subdir = "."
 
 [features.auth]
-version = "1.1.0"
+version = "1.2.0"
 path = "features/auth"
 external_steps = [
   "Choose final iOS and Android application identifiers before creating provider credentials.",
   "Follow the current Better Auth, Apple, Google, and Android Credential Manager links in docs/auth.md.",
-  "Run devme and complete its environment setup for the providers you need, then run devme run backend::auth-configure --output toon.",
+  "Run devme and complete its required Apple and Google environment setup, then run devme run backend::auth-configure --output toon.",
 ]
 remove_external_steps = [
   "Delete local auth secrets and revoke provider credentials that are no longer used.",
@@ -21,7 +21,7 @@ remove_external_steps = [
 ]
 
 [features.billing-stripe-external]
-version = "1.1.0"
+version = "1.2.0"
 path = "features/billing-stripe-external"
 dependencies = ["auth"]
 external_steps = [

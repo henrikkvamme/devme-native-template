@@ -15,6 +15,19 @@ describe("native feature recipe", () => {
     expect(authDevme).toContain("[env.GOOGLE_IOS_CLIENT_ID]");
     expect(authDevme).toContain("[env.GOOGLE_CLIENT_SECRET]");
     expect(authDevme).toContain("[env.APPLE_PRIVATE_KEY_FILE]");
+    for (const name of [
+      "GOOGLE_WEB_CLIENT_ID",
+      "GOOGLE_IOS_CLIENT_ID",
+      "GOOGLE_ANDROID_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "APPLE_CLIENT_ID",
+      "APPLE_TEAM_ID",
+      "APPLE_KEY_ID",
+      "APPLE_PRIVATE_KEY_FILE",
+      "APPLE_APP_BUNDLE_IDENTIFIER",
+    ]) {
+      expect(authDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
+    }
     expect(read("features/auth/docs/auth.md")).toContain(
       "Its environment setup writes provider values",
     );
@@ -56,6 +69,9 @@ describe("native feature recipe", () => {
     expect(billingDevme).toContain('env_file = ".env.auth.local"');
     expect(billingDevme).toContain("[env.STRIPE_SECRET_KEY]");
     expect(billingDevme).toContain("[env.STRIPE_PRICE_ID]");
+    for (const name of ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_PRICE_ID"]) {
+      expect(billingDevme).toMatch(new RegExp(`\\[env\\.${name}\\]\\nrequired = true`));
+    }
     expect(manifest).toContain("[features.auth]");
     expect(manifest).toContain("[features.billing-stripe-external]");
     expect(manifest).toContain('dependencies = ["auth"]');
